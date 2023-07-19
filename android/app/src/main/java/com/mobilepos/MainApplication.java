@@ -12,6 +12,8 @@ import com.facebook.soloader.SoLoader;
 import com.mobilepos.newarchitecture.MainApplicationReactNativeHost;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import io.invertase.firebase.app.ReactNativeFirebaseAppPackage;
+import io.invertase.firebase.functions.ReactNativeFirebaseFunctionsPackage;
 
 public class MainApplication extends Application implements ReactApplication {
 

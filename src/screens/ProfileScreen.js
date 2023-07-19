@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ScrollView, TextInput, Text, Image, StyleSheet, TouchableOpacity, View, Modal, Dimensions } from 'react-native';
 import { Switch } from "@react-native-material/core";
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import SMSVerification, { sendVerificationCode, verifyCode } from '../components/SMSVerification';
 
 const ProfileScreen = () => {
   const [img, setImageSource] = useState("");

@@ -6,6 +6,7 @@ import DetailScreen from '../screens/DetailScreen';
 import ReservationScreen from '../screens/ReservationScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import StoreReservationScreen from '../screens/StoreReservationScreen';
+import PinCodeScreen from '../screens/PinCodeScreen';
 import { LoginScreen, FindIDScreen, FindPasswordScreen } from '../screens/LoginScreen';
 import { SignupScreen1, SignupScreen2, SignupScreen3 } from '../screens/SignupScreen';
 
@@ -25,6 +26,7 @@ const ListStack = () => {
       <Stack.Screen name="stackList" component={ListScreen} />
       <Stack.Screen name="stackDetail" component={DetailScreen} />
       <Stack.Screen name="stackStoreReservation" component={StoreReservationScreen} />
+      <Stack.Screen name="stackPin" component={PinCodeScreen} />
     </Stack.Navigator>
   );
 };

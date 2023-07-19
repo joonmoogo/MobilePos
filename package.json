@@ -6,25 +6,36 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
-    "test": "jest",
-    "lint": "eslint ."
+    "test": "jest"
   },
   "dependencies": {
     "@jiggag/react-native-kakao-maps": "^0.0.10",
+    "@react-native-community/geolocation": "^3.0.6",
     "@react-native-community/masked-view": "^0.1.11",
     "@react-native-community/viewpager": "^5.0.11",
+    "@react-native-firebase/app": "^18.2.0",
+    "@react-native-firebase/auth": "^18.2.0",
+    "@react-native-firebase/firestore": "^18.2.0",
+    "@react-native-firebase/functions": "^18.2.0",
     "@react-native-material/core": "^1.3.7",
+    "@react-native-seoul/kakao-login": "^5.3.0",
+    "@react-native-seoul/naver-login": "^3.0.0-rc.2",
     "@react-navigation/bottom-tabs": "^6.5.7",
     "@react-navigation/drawer": "^6.6.2",
     "@react-navigation/native": "^6.1.6",
     "@react-navigation/stack": "^6.3.16",
     "@rneui/base": "^4.0.0-rc.7",
     "@rneui/themed": "^4.0.0-rc.7",
+    "axios": "^1.4.0",
+    "crypto-js": "^4.1.1",
     "expo-checkbox": "^2.3.1",
     "expo-permissions": "^14.1.1",
+    "geolib": "^3.3.4",
+    "moment": "^2.29.4",
     "react": "17.0.2",
     "react-hook-form": "^7.43.9",
     "react-native": "0.68.2",
+    "react-native-date-picker": "^4.2.13",
     "react-native-dropdown-picker": "^5.4.6",
     "react-native-dropdown-select-list": "^2.0.4",
     "react-native-elements": "^3.4.3",
@@ -38,9 +49,14 @@
     "react-native-scrollable-flexiable-tab": "^1.0.0",
     "react-native-scrollable-tab-view": "^1.0.0",
     "react-native-scrollable-tab-view-forked": "^1.1.4",
+    "react-native-simple-pin": "^0.0.3",
     "react-native-tab-view": "^3.5.1",
     "react-native-vector-icons": "^9.2.0",
-    "react-native-webview": "^12.0.2"
+    "react-native-webview": "^12.0.2",
+    "react-native-wheel-scrollview-picker": "^2.0.1",
+    "react-redux": "^8.1.1",
+    "redux": "^4.2.1",
+    "xml2js": "^0.6.0"
   },
   "devDependencies": {
     "@babel/core": "7.21.0",
@@ -53,6 +69,7 @@
     "react-test-renderer": "17.0.2"
   },
   "jest": {
-    "preset": "react-native"
+    "preset": "react-native",
+    "hasteImpl": "node_modules/jest-haste-map/build/default_resolver.js"
   }
 }

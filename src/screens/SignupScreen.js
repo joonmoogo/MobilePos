@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, Modal } from 'react-native';
 import CheckBox from 'expo-checkbox';
-import { useNavigation, StackActions } from '@react-navigation/native';
+import firestore from '@react-native-firebase/firestore';
+import functions from '@react-native-firebase/functions';
+import auth from '@react-native-firebase/auth';
 
 const SignupScreen1 = ({navigation}) => {
     const [isCheckedList, setIsCheckedList] = useState([false, false, false, false, false]);
@@ -100,18 +102,58 @@ const SignupScreen2 = ({navigation}) => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [message, setMessage] = useState('');
     const [validTime, setValidTime] = useState('');
+    const [verificationCode, setVerificationCode] = useState('');
     
-    const handleSignup = () => {
-      // 회원가입 처리 로직
-    }
+    const handleSignup = async () => {
+      try {
+        // Firebase Authentication을 사용하여 사용자 생성
+        const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+  
+        // 사용자 추가 정보 저장 (예: username)
+        await firestore().collection('users').doc(user.uid).set({
+          username: username,
+          email: email,
+        });
+  
+        // 회원가입 완료 후 다음 화면으로 이동
+        navigation.navigate('stackSignup3');
+      } catch (error) {
+        console.error('회원가입 오류:', error);
+      }
+    };
 
-    const checkhandlePress = () => {
+    const checkhandlePress = async () => {
+      // 중복확인 로직 구현 (필요한 경우)
       setMessage('사용 가능한 아이디 입니다.');
     };
 
-    const counthandlePress = () => {
-      setValidTime('00:10'); // 유효 시간 카운트 시작
-    }
+    const counthandlePress = async () => {
+      try {
+        // Firebase Functions를 사용하여 SMS 인증번호 전송
+        const sendVerificationCode = functions().httpsCallable('sendVerificationCode');
+        const phoneNumber = '+1083455272'; // 휴대폰 번호 입력 (실제 번호로 변경)
+        const result = await sendVerificationCode({ phoneNumber });
+    
+        if (result.data.success) {
+          // 인증번호 전송 성공
+          setValidTime('09:00'); // 유효 시간 카운트 시작
+          console.log('인증번호:', result.data.verificationCode);
+          
+          // Firestore에 인증번호를 사용자 문서에 저장
+          const userRef = firestore().collection('users').doc(phoneNumber);
+          await userRef.set({
+            verificationCode: result.data.verificationCode
+          });
+          
+          setMessage(''); // 인증번호가 전송되었으므로 메시지를 초기화합니다.
+        } else {
+          console.error(result.data.message);
+        }
+      } catch (error) {
+        console.error('인증번호 전송 오류:', error);
+      }
+    };
 
     useEffect(() => {
       if (validTime === '') return;
@@ -136,7 +178,35 @@ const SignupScreen2 = ({navigation}) => {
       return () => clearInterval(timer);
     }, [validTime]);
 
+    const verifyCode = async (phoneNumber) => {
+      try {
+        // Firestore에서 인증번호 확인
+        const userRef = firestore().collection('users').doc(phoneNumber);
+        const userDoc = await userRef.get();
     
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          const userVerificationCode = userData && userData.verificationCode;
+    
+          if (userVerificationCode && userVerificationCode === verificationCode.trim()) {
+            // 인증번호 일치
+            setMessage('인증되었습니다.');
+          } else {
+            // 인증번호 불일치
+            setMessage('인증번호가 올바르지 않습니다.');
+          }
+        } else {
+          // 사용자 문서가 존재하지 않음
+          setMessage('인증번호가 올바르지 않습니다.');
+        }
+      } catch (error) {
+        console.error('인증번호 확인 오류:', error);
+      }
+    };
+    
+    const handleVerificationCodeChange = (text) => {
+      setVerificationCode(text);
+    };
   
     return (
       <View style={styles.container}>
@@ -144,9 +214,12 @@ const SignupScreen2 = ({navigation}) => {
         
         <View style={{marginLeft: 40}}>
           <View style={{flexDirection:'row'}}>
-            <TextInput style={styles.input} 
-                  placeholder='아이디(ID)'
-                  placeholderTextColor='grey'>
+            <TextInput 
+              style={styles.input} 
+              placeholder='아이디(ID)'
+              placeholderTextColor='grey'
+              value={username}
+              onChangeText={setUsername}>
             </TextInput>
             <TouchableOpacity style={styles.smallbutton} onPress={checkhandlePress}>
                 <Text style={styles.smallbuttonText}>중복확인</Text>
@@ -157,15 +230,23 @@ const SignupScreen2 = ({navigation}) => {
           </View>
           <TextInput style={styles.input} 
                   placeholder='비밀번호(Password)'
-                  placeholderTextColor='grey'>
+                  placeholderTextColor='grey'
+                  secureTextEntry
+          value={password}
+          onChangeText={setPassword}>
           </TextInput>
           <TextInput style={styles.input} 
                   placeholder='비밀번호 확인(Password Confirm)'
-                  placeholderTextColor='grey'>
+                  placeholderTextColor='grey'
+                  secureTextEntry
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}>
           </TextInput>
           <TextInput style={styles.input} 
                   placeholder='이메일(E-mail)'
-                  placeholderTextColor='grey'>
+                  placeholderTextColor='grey'
+                  value={email}
+          onChangeText={setEmail}>
           </TextInput>
           <TextInput style={styles.input} 
                   placeholder='이름(Name)'
@@ -181,16 +262,21 @@ const SignupScreen2 = ({navigation}) => {
             </TouchableOpacity>
           </View>
           <View style={{flexDirection:'row'}}>
-          <TextInput style={styles.input} 
+            <TextInput style={styles.input} 
                   placeholder='인증번호 입력'
-                  placeholderTextColor='grey'>
-          </TextInput>
-          <Text style={styles.validTime}>{validTime}</Text>
+                  placeholderTextColor='grey'
+                  value={verificationCode}
+            onChangeText={handleVerificationCodeChange}>
+            </TextInput>
+            <Text style={styles.validTime}>{validTime}</Text>
+            <TouchableOpacity style={styles.smallbutton2} onPress={verifyCode}>
+                <Text style={styles.smallbuttonText}>확인</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('stackSignup3')}>
+            <TouchableOpacity style={styles.button} onPress={handleSignup}>
                 <Text style={styles.buttonText}>가입 완료</Text>
             </TouchableOpacity>
         </View>
@@ -271,6 +357,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#1c8adb',
     borderRadius: 8,
     width: '25%',
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 10,
+    marginTop: 10
+  },
+  smallbutton2: {
+    backgroundColor: '#1c8adb',
+    borderRadius: 8,
+    width: '10%',
     height: 30,
     alignItems: 'center',
     justifyContent: 'center',

@@ -1,14 +1,19 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Button } from 'react-native';
 import { Text, Card } from '@rneui/themed';
 
-const MenuCard = props => {
+const OrderMenuCard = ({ title, text, count, increaseCount, decreaseCount }) => {
   return (
     <Card wrapperStyle={styles.card}>
       <View style={styles.container}>
-        <Card.Title>{props.title}</Card.Title>
+        <Card.Title>{title}</Card.Title>
         <View>
-          <Text style={styles.text}>{props.text}</Text>
+          <Text style={styles.text}>{text}</Text>
+        </View>
+        <View style={{ flexDirection: "row" }}>
+          <Button title="-" onPress={decreaseCount} />
+          <Text style={{ alignSelf: "center" }}>   {count}   </Text>
+          <Button title="+" onPress={increaseCount} />
         </View>
       </View>
       <Card.Image
@@ -37,4 +42,5 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
 });
-export default MenuCard;
+
+export default OrderMenuCard;

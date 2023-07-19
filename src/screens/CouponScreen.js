@@ -1,10 +1,10 @@
 import React from 'react';
 import { StyleSheet, Text, View, Dimensions } from 'react-native';
 
-const ReservationScreen = () => {
+const CouponScreen = () => {
     return (
         <View style={styles.container}>
-          <Text style={styles.text}>예약 중</Text>
+          <Text style={styles.text}>쿠폰함</Text>
         </View>
     )
 }
@@ -23,4 +23,4 @@ const styles = StyleSheet.create({
     }
   });
 
-export default ReservationScreen;
+export default CouponScreen;

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Image, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { connect } from 'react-redux';
 
 const DrawerContent = props => {
   const [isLogged, setIsLogged] = useState(false);
@@ -188,7 +189,7 @@ const DrawerContent = props => {
           <View style={styles.subMenuContainer}>
             <TouchableOpacity
               onPress={() => {
-                props.navigation.navigate('subMenu1');
+                props.navigation.navigate('CouponScreen');
                 setProfileSubMenuVisible(false);
               }}>
               <Text style={styles.subMenuLabel}>쿠폰함</Text>
@@ -196,7 +197,7 @@ const DrawerContent = props => {
 
             <TouchableOpacity
               onPress={() => {
-                props.navigation.navigate('subMenu2');
+                props.navigation.navigate('ReviewScreen');
                 setProfileSubMenuVisible(false);
               }}>
               <Text style={styles.subMenuLabel}>리뷰 관리</Text>
@@ -204,7 +205,7 @@ const DrawerContent = props => {
 
             <TouchableOpacity
               onPress={() => {
-                props.navigation.navigate('subMenu2');
+                props.navigation.navigate('ReservationScreen');
                 setProfileSubMenuVisible(false);
               }}>
               <Text style={styles.subMenuLabel}>예약 관리</Text>
@@ -212,7 +213,7 @@ const DrawerContent = props => {
 
             <TouchableOpacity
               onPress={() => {
-                props.navigation.navigate('subMenu2');
+                props.navigation.navigate('BookmarkScreen');
                 setProfileSubMenuVisible(false);
               }}>
               <Text style={styles.subMenuLabel}>찜 목록</Text>
@@ -225,6 +226,10 @@ const DrawerContent = props => {
     </View>
   );
 };
+
+const mapStateToProps = (state) => ({
+  isLogged: state.isLogged,
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -298,4 +303,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DrawerContent;
+export default DrawerContent; connect(mapStateToProps)(DrawerContent);

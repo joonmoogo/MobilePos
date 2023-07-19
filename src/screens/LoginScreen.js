@@ -1,7 +1,66 @@
 import React, { useState } from 'react';
-import { Text, TextInput, Alert, Button, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Image, Text, TextInput, Alert, Button, View, StyleSheet, TouchableOpacity } from 'react-native';
+import NaverLogin, { NaverLoginResponse, GetProfileResponse } from '@react-native-seoul/naver-login';
+import  * as KakaoLogin from '@react-native-seoul/kakao-login';
+import { useDispatch } from 'react-redux';
+
+const consumerKey = 'x51vRYca8cKf7z7nyHKH';
+const consumerSecret = '957js3o85L';
+const appName = 'MobilePos';
+const serviceUrlScheme = 'yourappurlscheme';
 
 const LoginScreen = ({navigation}) => {
+  const dispatch = useDispatch();
+  const [success, setSuccessResponse] = useState();
+  const [failure, setFailureResponse] = useState();
+
+  const Naverlogin = async () => {
+    const { failureResponse, successResponse } = await NaverLogin.login({
+      appName,
+      consumerKey,
+      consumerSecret,
+      serviceUrlScheme,
+    });
+    setSuccessResponse(successResponse);
+    setFailureResponse(failureResponse);
+
+    console.log("Naver Login Success", JSON.stringify(successResponse));
+  };
+
+  const Naverlogout = async () => {
+    try {
+      await NaverLogin.logout();
+      setSuccessResponse(undefined);
+      setFailureResponse(undefined);
+      setGetProfileRes(undefined);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const NaverdeleteToken = async () => {
+    try {
+      await NaverLogin.deleteToken();
+      setSuccessResponse(undefined);
+      setFailureResponse(undefined);
+      setGetProfileRes(undefined);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const kakaologin = () => {
+    KakaoLogin.login().then((result) => {
+        console.log("Kakao Login Success", JSON.stringify(result));
+    }).catch((error) => {
+        if (error.code === 'E_CANCELLED_OPERATION') {
+            console.log("Login Cancel", error.message);
+        } else {
+            console.log(`Login Fail(code:${error.code})`, error.message);
+        }
+    });
+  };
+
     return (
       <View style={styles.container}>
         <Text style={styles.title}>로그인</Text>
@@ -34,6 +93,14 @@ const LoginScreen = ({navigation}) => {
             </TouchableOpacity>
           </Text>
         </View>
+
+          <TouchableOpacity onPress={Naverlogin}>
+            <Image style={styles.socialButton} source={require('../assets/naverlogin.png')}></Image>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={kakaologin}>
+            <Image style={styles.socialButton} source={require('../assets/kakaologin.png')}></Image>
+          </TouchableOpacity>
 
       </View>
     );
@@ -152,6 +219,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  socialButtonContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   button: {
     backgroundColor: '#1c8adb',
     borderRadius: 8,
@@ -165,6 +236,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  socialButton: {
+    borderRadius: 8,
+    width: '50%',
+    height: 48,
+    marginTop: 30,
+    marginLeft: 105
   },
   messageContainer: {
     marginTop: 20,

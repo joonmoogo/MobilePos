@@ -1,50 +1,64 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Text, ScrollView, StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Tab, TabView } from '@rneui/themed';
+import { WebView } from 'react-native-webview';
 import MenuCard from '../components/MenuCard';
 import ReviewCard from '../components/ReviewCard';
 
-const menus = [
-  {
-    title: '돈까스',
-    text: '육즙이 잘좔좔....겉바속촉 감동의 맛.... 손님 울었음\n가격 13,000원',
-  },
-  {
-    title: '파스타',
-    text: '이것이 마약 파스타\n대마 함유\n가격 12,000원',
-  },
-  {
-    title: '치킨',
-    text: '육즙이 잘좔좔....겉바속촉 감동의 맛.... 손님 울었음\n가격 13,000원',
-  },
-  {
-    title: '토스트',
-    text: '이것이 마약 파스타\n대마 함유\n가격 12,000원',
-  },
-  {
-    title: '옥수수',
-    text: '육즙이 잘좔좔....겉바속촉 감동의 맛.... 손님 울었음\n가격 13,000원',
-  },
-  {
-    title: '햄버거',
-    text: '이것이 마약 파스타\n대마 함유\n가격 12,000원',
-  },
-];
-
-const reviews = [
-  {
-    title: '구름이',
-    text: '너무 맛있었다',
-    rating: 5,
-  },
-  {
-    title: '구르니',
-    text: '너무 맛있다',
-    rating: 4,
-  },
-];
-
 const DetailScreen = ({ navigation }) => {
+  const [menus, setMenus] = useState([
+    {
+      title: '돈까스',
+      text: '육즙이 잘좔좔....겉바속촉 감동의 맛.... 손님 울었음\n가격 13,000원',
+      price: 13000,
+      count: 0
+    },
+    {
+      title: '파스타',
+      text: '이것이 마약 파스타\n대마 함유\n가격 12,000원',
+      price: 12000,
+      count: 0
+    },
+    {
+      title: '치킨',
+      text: '육즙이 잘좔좔....겉바속촉 감동의 맛.... 손님 울었음\n가격 13,000원',
+      price: 13000,
+      count: 0
+    },
+    {
+      title: '토스트',
+      text: '이것이 마약 파스타\n대마 함유\n가격 12,000원',
+      price: 12000,
+      count: 0
+    },
+    {
+      title: '옥수수',
+      text: '육즙이 잘좔좔....겉바속촉 감동의 맛.... 손님 울었음\n가격 13,000원',
+      price: 13000,
+      count: 0
+    },
+    {
+      title: '햄버거',
+      text: '이것이 마약 파스타\n대마 함유\n가격 12,000원',
+      price: 13000,
+      count: 0
+    },
+  ]);
+  
+  const reviews = [
+    {
+      title: '구름이',
+      text: '너무 맛있었다',
+      rating: 5,
+    },
+    {
+      title: '구르니',
+      text: '너무 맛있다',
+      rating: 4,
+    },
+  ];
+  const webViewRef = useRef(null);
+
   const [index, setIndex] = React.useState(0);
 
   const menuList = menus.map(menu => (
@@ -58,6 +72,47 @@ const DetailScreen = ({ navigation }) => {
       text={review.text}
       rating={review.rating}></ReviewCard>
   ));
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+        <meta charset="utf-8">
+        <style>
+          #map {
+            width: 100%;
+            height: 50vh;
+          }
+        </style>
+      </head>
+      <body>
+        <div id="map"></div>
+        <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=f100b132c7c96aa31427b9bd72068ff0&libraries=services"></script>
+        <script>
+        var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
+        mapOption = { 
+            center: new kakao.maps.LatLng(37.0113, 127.2650), // 지도의 중심좌표
+            level: 3 // 지도의 확대 레벨
+        };
+    
+    var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
+    
+    // 마커가 표시될 위치입니다 
+    var markerPosition  = new kakao.maps.LatLng(37.0113, 127.2650); 
+    
+    // 마커를 생성합니다
+    var marker = new kakao.maps.Marker({
+        position: markerPosition
+    });
+    
+    // 마커가 지도 위에 표시되도록 설정합니다
+    marker.setMap(map);
+
+        </script>
+      </body>
+    </html>
+  `;
 
   return (
     <View style={styles.container}>
@@ -89,7 +144,15 @@ const DetailScreen = ({ navigation }) => {
           </ScrollView>
         </TabView.Item>
   
-        <TabView.Item style={styles.tabViewItem}></TabView.Item>
+        <TabView.Item style={styles.tabViewItem}>
+          /* <View style={{flex:1}}>
+          <WebView
+            ref={webViewRef}
+            source={{ html: htmlContent }}
+            style={styles.webview}
+          />
+          </View> */
+        </TabView.Item>
   
         <TabView.Item style={styles.tabViewItem}>
           <ScrollView>{reviewList}</ScrollView>

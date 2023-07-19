@@ -2,6 +2,7 @@ import React from 'react';
 import {ActivityIndicator, StyleSheet, View} from 'react-native';
 import {PricingCard, Rating} from 'react-native-elements';
 import {Text, Card, Button, Icon} from '@rneui/themed';
+
 const ReviewCard = props => {
   return (
     <Card wrapperStyle={styles.card}>

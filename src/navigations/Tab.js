@@ -79,7 +79,7 @@ const ListTab = () => {
   
 const ReservationTab = () => {
     return (
-      <Tab.Navigator screenOptions={{headerShown: false}}>
+      <Tab.Navigator initialRouteName='tabReservation' screenOptions={{headerShown: false}}>
         <Tab.Screen 
             name ="tabMap" 
             component={MapStack} 
