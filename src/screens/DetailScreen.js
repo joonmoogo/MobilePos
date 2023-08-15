@@ -137,7 +137,7 @@ const DetailScreen = ({ navigation }) => {
           <ScrollView>
             <View>
               <View style={styles.header}>
-                <Text style={styles.headerText}>대표 메뉴</Text>
+                <Text style={styles.headerText}>메뉴</Text>
               </View>
               {menuList}
             </View>
@@ -145,13 +145,22 @@ const DetailScreen = ({ navigation }) => {
         </TabView.Item>
   
         <TabView.Item style={styles.tabViewItem}>
-          /* <View style={{flex:1}}>
-          <WebView
-            ref={webViewRef}
-            source={{ html: htmlContent }}
-            style={styles.webview}
-          />
-          </View> */
+          <ScrollView>
+            <View style={styles.informationItem}>
+              <Text>테이블 좌석 현황 표시 예정</Text>
+            </View>
+
+            <View style={styles.informationItem}>
+              <Text>바른생각을 가진 사람들이 만드는 요리 한스델리 안성점입니다.
+                {'\n'}운영시간 : 매일 오전 10:30 ~ 오후 8:30
+                {'\n'}단체 예약 가능, 혼밥석 보유 중, 선결제 가능 매장, 테이블 예약 가능
+              </Text>
+            </View>
+
+            <View style={styles.informationItem}>
+              <Text>가게의 현위치를 표시한 지도 표시 예정</Text>
+            </View>
+          </ScrollView> 
         </TabView.Item>
   
         <TabView.Item style={styles.tabViewItem}>
@@ -169,7 +178,7 @@ const styles = StyleSheet.create({
   },
   tabViewItem: {
     width: '100%',
-    backgroundColor: '#ebecf0'
+    backgroundColor: '#ebecf0',
   },
   header: {
     height: 60,
@@ -183,6 +192,13 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex:1
+  },
+  informationItem: {
+    backgroundColor: 'white',
+    width: '85%',
+    height: 200,
+    margin: 20,
+    marginLeft: 30
   }
 });
 

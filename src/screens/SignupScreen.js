@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Modal } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, Modal, Alert } from 'react-native';
 import CheckBox from 'expo-checkbox';
-import firestore from '@react-native-firebase/firestore';
-import functions from '@react-native-firebase/functions';
-import auth from '@react-native-firebase/auth';
+
+const apiUrl = 'http://192.168.35.163:8080';
 
 const SignupScreen1 = ({navigation}) => {
     const [isCheckedList, setIsCheckedList] = useState([false, false, false, false, false]);
@@ -96,118 +95,42 @@ const SignupScreen1 = ({navigation}) => {
   }
 
 const SignupScreen2 = ({navigation}) => {
-    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
+    const [nickname, setNickname] = useState('');
     const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [message, setMessage] = useState('');
-    const [validTime, setValidTime] = useState('');
-    const [verificationCode, setVerificationCode] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
     
     const handleSignup = async () => {
       try {
-        // Firebase Authentication을 사용하여 사용자 생성
-        const userCredential = await auth().createUserWithEmailAndPassword(email, password);
-        const user = userCredential.user;
-  
-        // 사용자 추가 정보 저장 (예: username)
-        await firestore().collection('users').doc(user.uid).set({
-          username: username,
-          email: email,
+        const response = await fetch(`${apiUrl}/users`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: email,
+            password: password,
+            nickname: nickname,
+            phoneNumber: phoneNumber
+          }),
         });
-  
-        // 회원가입 완료 후 다음 화면으로 이동
-        navigation.navigate('stackSignup3');
-      } catch (error) {
-        console.error('회원가입 오류:', error);
-      }
-    };
-
-    const checkhandlePress = async () => {
-      // 중복확인 로직 구현 (필요한 경우)
-      setMessage('사용 가능한 아이디 입니다.');
-    };
-
-    const counthandlePress = async () => {
-      try {
-        // Firebase Functions를 사용하여 SMS 인증번호 전송
-        const sendVerificationCode = functions().httpsCallable('sendVerificationCode');
-        const phoneNumber = '+1083455272'; // 휴대폰 번호 입력 (실제 번호로 변경)
-        const result = await sendVerificationCode({ phoneNumber });
     
-        if (result.data.success) {
-          // 인증번호 전송 성공
-          setValidTime('09:00'); // 유효 시간 카운트 시작
-          console.log('인증번호:', result.data.verificationCode);
-          
-          // Firestore에 인증번호를 사용자 문서에 저장
-          const userRef = firestore().collection('users').doc(phoneNumber);
-          await userRef.set({
-            verificationCode: result.data.verificationCode
-          });
-          
-          setMessage(''); // 인증번호가 전송되었으므로 메시지를 초기화합니다.
+        if (response.ok) {
+          console.log('회원가입 성공');
         } else {
-          console.error(result.data.message);
+          const errorData = await response.json(); 
+          console.error('회원가입 실패: ', `${errorData.message}`);
         }
       } catch (error) {
-        console.error('인증번호 전송 오류:', error);
+        console.error('기타 오류:', error);
       }
+
+      console.log('nickname:', nickname);
+      console.log('email:', email); 
+      console.log('password:', password);
+      console.log('phoneNumber:', phoneNumber); 
     };
 
-    useEffect(() => {
-      if (validTime === '') return;
-    
-      const timer = setInterval(() => {
-        const timeArray = validTime.split(':');
-        const minute = parseInt(timeArray[0]);
-        const second = parseInt(timeArray[1]);
-    
-        if (second === 0) {
-          if (minute === 0) {
-            setValidTime('');
-            clearInterval(timer);
-          } else {
-            setValidTime(`${minute - 1}:59`);
-          }
-        } else {
-          setValidTime(`${minute}:${second - 1 < 10 ? '0' + (second - 1) : second - 1}`);
-        }
-      }, 1000);
-    
-      return () => clearInterval(timer);
-    }, [validTime]);
-
-    const verifyCode = async (phoneNumber) => {
-      try {
-        // Firestore에서 인증번호 확인
-        const userRef = firestore().collection('users').doc(phoneNumber);
-        const userDoc = await userRef.get();
-    
-        if (userDoc.exists) {
-          const userData = userDoc.data();
-          const userVerificationCode = userData && userData.verificationCode;
-    
-          if (userVerificationCode && userVerificationCode === verificationCode.trim()) {
-            // 인증번호 일치
-            setMessage('인증되었습니다.');
-          } else {
-            // 인증번호 불일치
-            setMessage('인증번호가 올바르지 않습니다.');
-          }
-        } else {
-          // 사용자 문서가 존재하지 않음
-          setMessage('인증번호가 올바르지 않습니다.');
-        }
-      } catch (error) {
-        console.error('인증번호 확인 오류:', error);
-      }
-    };
-    
-    const handleVerificationCodeChange = (text) => {
-      setVerificationCode(text);
-    };
-  
     return (
       <View style={styles.container}>
         <Text style={styles.title}>회원가입</Text>
@@ -218,60 +141,38 @@ const SignupScreen2 = ({navigation}) => {
               style={styles.input} 
               placeholder='아이디(ID)'
               placeholderTextColor='grey'
-              value={username}
-              onChangeText={setUsername}>
+              value={nickname}
+              onChangeText={text => setNickname(text)}>
             </TextInput>
-            <TouchableOpacity style={styles.smallbutton} onPress={checkhandlePress}>
-                <Text style={styles.smallbuttonText}>중복확인</Text>
-            </TouchableOpacity>
           </View>
-          <View style={styles.messageContainer}>
-            <Text style={styles.message}>{message}</Text>
-          </View>
+
           <TextInput style={styles.input} 
                   placeholder='비밀번호(Password)'
                   placeholderTextColor='grey'
                   secureTextEntry
-          value={password}
-          onChangeText={setPassword}>
+                  value={password}
+                  onChangeText={text => setPassword(text)}>
           </TextInput>
-          <TextInput style={styles.input} 
-                  placeholder='비밀번호 확인(Password Confirm)'
-                  placeholderTextColor='grey'
-                  secureTextEntry
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}>
-          </TextInput>
+
           <TextInput style={styles.input} 
                   placeholder='이메일(E-mail)'
                   placeholderTextColor='grey'
                   value={email}
-          onChangeText={setEmail}>
+                  onChangeText={text => setEmail(text)}>
           </TextInput>
+
           <TextInput style={styles.input} 
                   placeholder='이름(Name)'
                   placeholderTextColor='grey'>
           </TextInput>
+
           <View style={{flexDirection:'row'}}>
             <TextInput style={styles.input} 
                   placeholder='휴대폰(Phone)'
-                  placeholderTextColor='grey'>
-            </TextInput>
-            <TouchableOpacity style={styles.smallbutton} onPress={counthandlePress}>
-                <Text style={styles.smallbuttonText}>인증번호 받기</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={{flexDirection:'row'}}>
-            <TextInput style={styles.input} 
-                  placeholder='인증번호 입력'
                   placeholderTextColor='grey'
-                  value={verificationCode}
-            onChangeText={handleVerificationCodeChange}>
+                  value={phoneNumber}
+                  onChangeText={text => setPhoneNumber(text)}>
             </TextInput>
-            <Text style={styles.validTime}>{validTime}</Text>
-            <TouchableOpacity style={styles.smallbutton2} onPress={verifyCode}>
-                <Text style={styles.smallbuttonText}>확인</Text>
-            </TouchableOpacity>
           </View>
         </View>
 

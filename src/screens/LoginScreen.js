@@ -2,17 +2,47 @@ import React, { useState } from 'react';
 import { Image, Text, TextInput, Alert, Button, View, StyleSheet, TouchableOpacity } from 'react-native';
 import NaverLogin, { NaverLoginResponse, GetProfileResponse } from '@react-native-seoul/naver-login';
 import  * as KakaoLogin from '@react-native-seoul/kakao-login';
-import { useDispatch } from 'react-redux';
 
 const consumerKey = 'x51vRYca8cKf7z7nyHKH';
 const consumerSecret = '957js3o85L';
 const appName = 'MobilePos';
 const serviceUrlScheme = 'yourappurlscheme';
+const apiUrl = 'http://192.168.35.163:8080';
 
 const LoginScreen = ({navigation}) => {
-  const dispatch = useDispatch();
   const [success, setSuccessResponse] = useState();
   const [failure, setFailureResponse] = useState();
+  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+
+  const handleLogin = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/auth`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          'Email': email,
+          'Password': password
+        }), 
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const token = data.token;
+        console.log('토큰: ', token);
+      } else {
+        const errorData = await response.json();
+        console.error('로그인 실패:', errorData.message);
+      }
+    } catch (error) {
+      console.error('기타 오류:', error);
+    }
+
+    console.log('email:', email); 
+    console.log('password:', password);
+};
 
   const Naverlogin = async () => {
     const { failureResponse, successResponse } = await NaverLogin.login({
@@ -68,16 +98,20 @@ const LoginScreen = ({navigation}) => {
         <View style={{marginTop: 30, justifyContent: 'center', alignItems: 'center'}}>
           <TextInput style={styles.input} 
                   placeholder='아이디 또는 이메일'
-                  placeholderTextColor='grey'>
+                  placeholderTextColor='grey'
+                  value={email}
+                  onChangeText={text => setEmail(text)}>
           </TextInput>
           <TextInput style={styles.input} 
                   placeholder='비밀번호'
-                  placeholderTextColor='grey'>
+                  placeholderTextColor='grey'
+                  value={password}
+                  onChangeText={text => setPassword(text)}>
           </TextInput>
         </View>
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={() => navigation.reset({routes: [{name: 'ListScreen'}]})}>
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>로그인</Text>
           </TouchableOpacity>
         </View>
