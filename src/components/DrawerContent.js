@@ -57,7 +57,7 @@ const DrawerContent = props => {
                   style={styles.profileImage}
                   source={{ uri: 'https://awildgeographer.files.wordpress.com/2015/02/john_muir_glacier.jpg' }}
                 />
-                <Text style={styles.profileText}>구름이</Text>
+                <Text style={styles.profileText}>kwn01081</Text>
               </View>
             </View>
           ) : (

@@ -96,17 +96,24 @@ const ProfileScreen = () => {
         </View>
 
         <View style={styles.container}>
-          <TextInput style={styles.nameInput}></TextInput>
+          <TextInput style={styles.nameInput}
+                  placeholder='kwn01081'
+                  placeholderTextColor='grey'></TextInput>
         </View>
       
         <View style={{flexDirection: 'row', marginBottom:15}}>
           <Text style={{color: 'black', marginTop:10, marginRight:20}}>이메일          </Text>
-          <TextInput style={styles.input}></TextInput>
+          <TextInput style={styles.input}
+          placeholder='kwn01081@gmail.com'
+          placeholderTextColor='grey'></TextInput>
         </View>
 
         <View style={{flexDirection: 'row', marginBottom:15}}>
           <Text style={{color: 'black', marginTop:10, marginRight:20}}>현재 비밀번호</Text>
-          <TextInput style={styles.input}></TextInput>
+          <TextInput style={styles.input}
+          placeholder='!password123'
+          placeholderTextColor='grey'
+          secureTextEntry></TextInput>
         </View>
 
         <View style={{flexDirection: 'row'}}>
@@ -122,7 +129,9 @@ const ProfileScreen = () => {
 
         <View style={{flexDirection: 'row', marginTop:15}}>
           <Text style={{color: 'black', marginTop:10, marginRight:20}}>휴대폰         </Text>
-          <TextInput style={styles.input}></TextInput>
+          <TextInput style={styles.input}
+          placeholder='01083455272'
+          placeholderTextColor='grey'></TextInput>
         </View>
 
         <View>

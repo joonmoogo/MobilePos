@@ -8,6 +8,7 @@ import WesternMenuComponent from '../components/WesternMenuComponent';
 import AsianMenuComponent from '../components/AsianMenuComponent';
 import SnackMenuComponent from '../components/SnackMenuComponent';
 import OneMenuComponent from '../components/OneMenuComponent';
+import SearchScreen from '../screens/SearchScreen';
 
 const ListScreen = ({ navigation }) => {
   const [selectedMenu, setSelectedMenu] = useState('all');
@@ -19,11 +20,16 @@ const ListScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.inputcontainer}>
-        <TextInput style={styles.input} placeholder='Search'></TextInput>
+        <TextInput
+          style={styles.input}
+          placeholder='Search'
+          placeholderTextColor='grey'
+          onFocus={() => navigation.navigate('stackSearch')}
+        />
       </View>
 
       <View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <TouchableOpacity
           style={selectedMenu === 'all' ? styles.selectedMenu : styles.menu}
           onPress={() => handleMenuPress('all')}>
@@ -64,7 +70,7 @@ const ListScreen = ({ navigation }) => {
           onPress={() => handleMenuPress('one')}>
           <Text style={selectedMenu === 'one' ? styles.selectedMenuText : styles.menuText}>혼밥</Text>
         </TouchableOpacity>
-      </ScrollView>
+        </ScrollView>
       </View>
 
       <View>
@@ -77,6 +83,7 @@ const ListScreen = ({ navigation }) => {
         {selectedMenu === 'snack' && (<SnackMenuComponent navigation={navigation} />)}
         {selectedMenu === 'one' && (<OneMenuComponent navigation={navigation} />)}
       </View>
+
     </View>
   );
 };

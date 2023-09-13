@@ -9,6 +9,7 @@ import StoreReservationScreen from '../screens/StoreReservationScreen';
 import PinCodeScreen from '../screens/PinCodeScreen';
 import { LoginScreen, FindIDScreen, FindPasswordScreen } from '../screens/LoginScreen';
 import { SignupScreen1, SignupScreen2, SignupScreen3 } from '../screens/SignupScreen';
+import SearchScreen from '../screens/SearchScreen';
 
 const Stack = createStackNavigator();
 
@@ -27,6 +28,7 @@ const ListStack = () => {
       <Stack.Screen name="stackDetail" component={DetailScreen} />
       <Stack.Screen name="stackStoreReservation" component={StoreReservationScreen} />
       <Stack.Screen name="stackPin" component={PinCodeScreen} />
+      <Stack.Screen name="stackSearch" component={SearchScreen} />
     </Stack.Navigator>
   );
 };

@@ -46,4 +46,5 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
 });
+
 export default ReviewCard;

@@ -10,9 +10,7 @@ const ReservationCard = props => {
           <Card.Title style={{fontSize:30}}>{props.title}</Card.Title>
           <TouchableOpacity
             style={styles.button} 
-            onPress={() => {
-              console.log('예약 취소 버튼 클릭됨');
-            }}>
+            onPress={props.onCancel}>
             <Text style={styles.buttonText}>예약 취소</Text>
           </TouchableOpacity>
         </View>

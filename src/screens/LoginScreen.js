@@ -7,34 +7,35 @@ const consumerKey = 'x51vRYca8cKf7z7nyHKH';
 const consumerSecret = '957js3o85L';
 const appName = 'MobilePos';
 const serviceUrlScheme = 'yourappurlscheme';
-const apiUrl = 'http://192.168.35.163:8080';
+const apiUrl = 'http://192.168.0.21:8080';
 
 const LoginScreen = ({navigation}) => {
   const [success, setSuccessResponse] = useState();
   const [failure, setFailureResponse] = useState();
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
+  const [loginerror, setLoginError] = useState('');
 
   const handleLogin = async () => {
+    let formData = new FormData();
+    formData.append('email', email);
+    formData.append('password', password);
     try {
       const response = await fetch(`${apiUrl}/auth`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          'Email': email,
-          'Password': password
-        }), 
+        body: formData, 
       });
 
       if (response.ok) {
-        const data = await response.json();
-        const token = data.token;
-        console.log('토큰: ', token);
+        console.log('로그인 성공');
+        setEmail('');
+        setPassword('');
+        setLoginError('');
+        navigation.navigate('stackList');
       } else {
-        const errorData = await response.json();
-        console.error('로그인 실패:', errorData.message);
+        setLoginError('다시 시도해 주세요');
+        const errorData = await response.json(); 
+        console.error('로그인 실패:', `${errorData.message}`);
       }
     } catch (error) {
       console.error('기타 오류:', error);
@@ -97,7 +98,7 @@ const LoginScreen = ({navigation}) => {
 
         <View style={{marginTop: 30, justifyContent: 'center', alignItems: 'center'}}>
           <TextInput style={styles.input} 
-                  placeholder='아이디 또는 이메일'
+                  placeholder='이메일'
                   placeholderTextColor='grey'
                   value={email}
                   onChangeText={text => setEmail(text)}>
@@ -105,10 +106,15 @@ const LoginScreen = ({navigation}) => {
           <TextInput style={styles.input} 
                   placeholder='비밀번호'
                   placeholderTextColor='grey'
+                  secureTextEntry
                   value={password}
                   onChangeText={text => setPassword(text)}>
           </TextInput>
+          <View>
+            <Text style={{ color: 'red' }}>{loginerror}</Text>
+          </View>
         </View>
+        
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
@@ -287,6 +293,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'red',
     textAlign: 'center'
+  },
+  errorText: {
+    color: 'red',
+    marginTop: 10,
   },
 });
 

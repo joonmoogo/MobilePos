@@ -4,7 +4,6 @@ import { Text, Card } from '@rneui/themed';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 const StoreCard = props => {
-
   const randomRating = (Math.random() * 5).toFixed(1);
 
   return (

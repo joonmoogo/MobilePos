@@ -198,6 +198,7 @@ const MapScreen = ({ navigation }) => {
       <View style={styles.inputcontainer}>
         <TextInput style={styles.input} placeholder='Search'></TextInput>
       </View>
+      
       <WebView
         ref={webViewRef}
         source={{ html: htmlContent }}
