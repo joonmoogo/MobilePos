@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Dimensions } from 'react-native';
-import BookmarkCard from '../components/BookmarkCard';
+import BookmarkCard from '../components/card/BookmarkCard';
 
 const BookmarkScreen = () => {
   const [bookmarks, setBookmarks] = useState([

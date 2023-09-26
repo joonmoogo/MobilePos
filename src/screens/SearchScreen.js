@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Dimensions, TextInput, ScrollView } from 'react-native';
-import StoreCard from '../components/StoreCard';
+import StoreCard from '../components/card/StoreCard';
 import goodRestaurants from '../assets/goodrestaurants.json';
 
 const SearchScreen = ({ navigation }) => {

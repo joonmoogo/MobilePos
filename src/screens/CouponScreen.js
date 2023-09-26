@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Dimensions } from 'react-native';
-import CouponCard from '../components/CouponCard';
+import CouponCard from '../components/card/CouponCard';
 
 const CouponScreen = () => {
   const [coupons, setCoupons] = useState([

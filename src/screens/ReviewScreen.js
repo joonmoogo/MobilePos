@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Dimensions } from 'react-native';
-import ReviewCard from '../components/ReviewCard';
+import ReviewCard from '../components/card/ReviewCard';
 
 const ReviewScreen = () => {
   const [reviews, setReviews] = useState([

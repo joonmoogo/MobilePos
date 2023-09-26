@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Text, ScrollView, StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Tab, TabView } from '@rneui/themed';
 import { WebView } from 'react-native-webview';
-import MenuCard from '../components/MenuCard';
-import ReviewCard from '../components/ReviewCard';
+import MenuCard from '../components/card/MenuCard';
+import ReviewCard from '../components/card/ReviewCard';
 
 const DetailScreen = ({ navigation }) => {
   const [menus, setMenus] = useState([

@@ -11,8 +11,8 @@ const StoreReservationScreen = ({navigation}) => {
             </View>
             <ReservationDetail />
             <View>
-              <TouchableOpacity style={styles.nextButton} onPress={() => navigation.navigate('stackPin')}>
-                <Text style={{alignSelf: 'center', color: 'white', fontSize: 25}}>예약 신청 완료</Text>
+              <TouchableOpacity style={styles.nextButton} onPress={() => navigation.navigate('stackReservation')}>
+                <Text style={{alignSelf: 'center', color: 'white', fontSize: 25}}>예약 신청</Text>
               </TouchableOpacity>
             </View>
         </View>

@@ -7,7 +7,7 @@ const consumerKey = 'x51vRYca8cKf7z7nyHKH';
 const consumerSecret = '957js3o85L';
 const appName = 'MobilePos';
 const serviceUrlScheme = 'yourappurlscheme';
-const apiUrl = 'http://192.168.0.21:8080';
+const apiUrl = 'http://192.168.0.21:8082';
 
 const LoginScreen = ({navigation}) => {
   const [success, setSuccessResponse] = useState();

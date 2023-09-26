@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Dimensions, ScrollView } from 'react-native';
-import ReservationCard from '../components/ReservationCard';
-import ReservationedCard from '../components/ReservationedCard';
+import ReservationCard from '../components/card/ReservationCard';
+import ReservationedCard from '../components/card/ReservationedCard';
 
 const ReservationScreen = () => {
     const [reservations, setReservations] = useState([

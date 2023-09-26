@@ -5,112 +5,25 @@ import { MapStack, ListStack, ReservationStack } from "./Stack";
 
 const Tab = createBottomTabNavigator();
 
-const MapTab = () => {
-    return (
-      <Tab.Navigator screenOptions={{headerShown: false}}>
-        <Tab.Screen 
-            name ="tabMap" 
-            component={MapStack} 
-            options={{
-                tabBarIcon: ({color, size}) => (
-                    <Icon name="map" color={color} size={size}></Icon>
-                ),
-                tabBarLabel: () => null,
-            }}>
-        </Tab.Screen>
-        <Tab.Screen 
-            name ="tabList" 
-            component={ListStack} 
-            options={{
-                tabBarIcon: ({color, size}) => (
-                    <Icon name="restaurant" color={color} size={size}></Icon>
-                ),
-                tabBarLabel: () => null,
-            }}>
-        </Tab.Screen>
-        <Tab.Screen 
-            name="tabReservation" 
-            component={ReservationStack} 
-            options={{
-                tabBarIcon: ({color, size}) => (
-                    <Icon name="schedule" color={color} size={size}></Icon>
-                ),
-                tabBarLabel: () => null,
-            }}/>
-      </Tab.Navigator>
-    );
+const TabScreenOptions = (routeName, iconName) => ({
+  tabBarIcon: ({ color, size }) => (
+    <Icon name={iconName} color={color} size={size}></Icon>
+  ),
+  tabBarLabel: () => null,
+});
+
+const createTabNavigator = (initialRouteName) => {
+  return (
+    <Tab.Navigator initialRouteName={initialRouteName} screenOptions={{ headerShown: false }}>
+      <Tab.Screen name="tabMap" component={MapStack} options={TabScreenOptions('tabMap', 'map')} />
+      <Tab.Screen name="tabList" component={ListStack} options={TabScreenOptions('tabList', 'restaurant')} />
+      <Tab.Screen name="tabReservation" component={ReservationStack} options={TabScreenOptions('tabReservation', 'schedule')} />
+    </Tab.Navigator>
+  );
 };
-  
-const ListTab = () => {
-    return (
-      <Tab.Navigator initialRouteName='tabList' screenOptions={{headerShown: false}}>
-        <Tab.Screen 
-            name ="tabMap" 
-            component={MapStack} 
-            options={{
-                tabBarIcon: ({color, size}) => (
-                    <Icon name="map" color={color} size={size}></Icon>
-                ),
-                tabBarLabel: () => null,
-            }}>
-        </Tab.Screen>
-        <Tab.Screen 
-            name ="tabList" 
-            component={ListStack} 
-            options={{
-                tabBarIcon: ({color, size}) => (
-                    <Icon name="restaurant" color={color} size={size}></Icon>
-                ),
-                tabBarLabel: () => null,
-            }}>
-        </Tab.Screen>
-        <Tab.Screen 
-            name="tabReservation" 
-            component={ReservationStack} 
-            options={{
-                tabBarIcon: ({color, size}) => (
-                    <Icon name="schedule" color={color} size={size}></Icon>
-                ),
-                tabBarLabel: () => null,
-            }}/>
-      </Tab.Navigator>
-    );
-};
-  
-const ReservationTab = () => {
-    return (
-      <Tab.Navigator initialRouteName='tabReservation' screenOptions={{headerShown: false}}>
-        <Tab.Screen 
-            name ="tabMap" 
-            component={MapStack} 
-            options={{
-                tabBarIcon: ({color, size}) => (
-                    <Icon name="map" color={color} size={size}></Icon>
-                ),
-                tabBarLabel: () => null,
-            }}>
-        </Tab.Screen>
-        <Tab.Screen 
-            name ="tabList" 
-            component={ListStack} 
-            options={{
-                tabBarIcon: ({color, size}) => (
-                    <Icon name="restaurant" color={color} size={size}></Icon>
-                ),
-                tabBarLabel: () => null,
-            }}>
-        </Tab.Screen>
-        <Tab.Screen 
-            name="tabReservation" 
-            component={ReservationStack} 
-            options={{
-                tabBarIcon: ({color, size}) => (
-                    <Icon name="schedule" color={color} size={size}></Icon>
-                ),
-                tabBarLabel: () => null,
-            }}/>
-      </Tab.Navigator>
-    );
-};
+
+const MapTab = () => createTabNavigator('tabMap');
+const ListTab = () => createTabNavigator('tabList');
+const ReservationTab = () => createTabNavigator('tabReservation');
 
 export { MapTab, ListTab, ReservationTab };

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { StyleSheet, View, ScrollView, Text, TouchableOpacity, Dimensions } from 'react-native';
-import OrderMenuCard from '../components/OrderMenuCard';
+import OrderMenuCard from '../components/card/OrderMenuCard';
 import DatePicker from 'react-native-date-picker';
 import ScrollPicker from 'react-native-wheel-scrollview-picker';
 import { menus } from '../screens/DetailScreen';

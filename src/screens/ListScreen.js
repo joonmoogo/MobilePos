@@ -1,21 +1,42 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
-import AllMenuComponent from '../components/AllMenuComponent';
-import KoreanMenuComponent from '../components/KoreanMenuComponent';
-import ChineseMenuComponent from '../components/ChineseMenuComponent';
-import JapaneseMenuComponent from '../components/JapaneseMenuComponent';
-import WesternMenuComponent from '../components/WesternMenuComponent';
-import AsianMenuComponent from '../components/AsianMenuComponent';
-import SnackMenuComponent from '../components/SnackMenuComponent';
-import OneMenuComponent from '../components/OneMenuComponent';
-import SearchScreen from '../screens/SearchScreen';
+import DropDownPicker from "react-native-dropdown-picker";
+import useLocation from '../utils/LocationUtils';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import CheckBox from 'expo-checkbox';
+import AllMenuComponent from '../components/menu/AllMenuComponent';
+import KoreanMenuComponent from '../components/menu/KoreanMenuComponent';
+import ChineseMenuComponent from '../components/menu/ChineseMenuComponent';
+import JapaneseMenuComponent from '../components/menu/JapaneseMenuComponent';
+import WesternMenuComponent from '../components/menu/WesternMenuComponent';
+import AsianMenuComponent from '../components/menu/AsianMenuComponent';
+import SnackMenuComponent from '../components/menu/SnackMenuComponent';
+import OneMenuComponent from '../components/menu/OneMenuComponent';
 
 const ListScreen = ({ navigation }) => {
+  // 메뉴 섹션 선택, 기본='전체'
   const [selectedMenu, setSelectedMenu] = useState('all');
-
   const handleMenuPress = (menu) => {
     setSelectedMenu(menu);
   };
+
+  // 현재 위치 찾기, 아이콘 눌러 리프레시
+  const { currentLocation, currentAddress, isLoadingLocation, getCurrentLocation } = useLocation();
+  const handleIconPress = () => {
+    getCurrentLocation();
+  };
+
+  // dropdown 박스
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState('distance');
+  const [items, setItems] = useState([
+    {label: '거리 순', value: 'distance'},
+    {label: '별점 순', value: 'star'},
+    {label: '리뷰 많은 순', value: 'review'},
+  ]);
+
+  // 찜한 가게 체크, 기능 구현 필요함
+  const [isChecked, setChecked] = useState(false);
 
   return (
     <View style={styles.container}>
@@ -72,6 +93,38 @@ const ListScreen = ({ navigation }) => {
         </TouchableOpacity>
         </ScrollView>
       </View>
+
+      <View style={{flexDirection: 'row', margin:15}}>
+        <TouchableOpacity onPress={handleIconPress}>
+          <Icon style={{ color: 'grey'}} name="room" size={25} />
+        </TouchableOpacity>
+        {isLoadingLocation ? (
+            <Text style={{ color: 'grey', fontSize: 20 }}>위치 검색 중입니다...</Text>
+          ) : (
+            <Text style={{ color: 'grey', fontSize: 20 }}>{currentAddress}</Text>
+          )}
+        </View>
+
+        <View style={{flexDirection: 'row'}}>
+          <View style={styles.dropdownFrame}>
+            <DropDownPicker
+              style={styles.dropdown}
+              open={open}
+              value={value}
+              items={items}
+              setOpen={setOpen}
+              setValue={setValue}
+              setItems={setItems}
+            />
+          </View>
+
+          <View style={styles.checkboxFrame}>
+            <Text style={{flexDirection: 'row'}}>
+              <CheckBox value={isChecked} onValueChange={setChecked} />
+              <Text style={{color: 'grey'}}>  찜한 가게만 보기</Text>
+            </Text>
+          </View>
+        </View>
 
       <View>
         {selectedMenu === 'all' && (<AllMenuComponent navigation={navigation} />)}
@@ -135,6 +188,27 @@ const styles = StyleSheet.create({
   placeholderStyles: {
     color: "grey",
   },
+  dropdownFrame: {
+    marginLeft: 15
+  },
+  dropdown: {
+    width: Dimensions.get('window').width - 200,
+  },
+  storebox: {
+    alignSelf: 'center',
+    width: Dimensions.get('window').width - 28,
+    height: 110,
+    marginTop: 10,
+    fontSize: 25,
+    color: 'black',
+    padding: 15,
+    borderWidth: 1,
+    borderColor: 'lightgrey',
+    fontWeight: 'bold'
+  },
+  checkboxFrame: {
+    margin: 15
+  }
 });
 
 export default ListScreen;

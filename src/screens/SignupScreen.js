@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, Modal, KeyboardAvoidingView } from 'react-native';
 import CheckBox from 'expo-checkbox';
-import { checkEmail, checkNickName, checkPhoneNumber } from '../controllers/CheckController.ts'
 import { ScrollView } from 'react-native-gesture-handler';
-
-const apiUrl = 'http://192.168.0.21:8080';
+import { apiUrl } from '../config';
+import { handleNickNameCheck, handleEmailCheck, handlePhoneNumberCheck, handlePasswordCheck } from '../utils/checkHandlers';
+import CryptoJS from 'crypto-js';
 
 const SignupScreen1 = ({navigation}) => {
     const [isCheckedList, setIsCheckedList] = useState([false, false, false, false, false]);
@@ -108,10 +108,16 @@ const SignupScreen1 = ({navigation}) => {
 
 const SignupScreen2 = ({navigation}) => {
   const [email, setEmail] = useState('');
+  const [emailCheck, setEmailCheck] = useState('');
+  const [emailAuthrorization, setEmailAuthorization] = useState(false);
   const [nickname, setNickname] = useState('');
+  const [nicknameCheck, setNicknameCheck] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [passwordMatchMessage, setPasswordMatchMessage] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-    
+  const [phoneNumberCheck, setPhoneNumberCheck] = useState('');
+
   const handleSignup = async () => {
     let formData = new FormData();
     formData.append('email', email);
@@ -138,122 +144,7 @@ const SignupScreen2 = ({navigation}) => {
     console.log('email:', email); 
     console.log('password:', password);
     console.log('phoneNumber:', phoneNumber); 
-  };
-
-  const [nicknameCheck, setNicknameCheck] = useState('');
-
-  const handleNickNameCheck = async () => {
-    if (nickname.trim() === '') { // 닉네임이 공백인 경우
-      setNicknameCheck('닉네임을 입력해주세요.');
-      return;
-    }
-
-    let formData = new FormData();
-    formData.append('nickname', nickname);
-    
-    try {
-      const response = await fetch(`${apiUrl}/check/nickname`, {
-        method: 'POST',
-        body: formData,
-      });
-      console.log('response:', response);
-  
-      if (response.ok) {
-        const resultJSON = await response.json(); // JSON 데이터로 변환
-        const result = resultJSON === 'false' ? false : resultJSON; // 문자열 'false'를 불리언 false로 변환
-
-        if (result === false) {
-          setNicknameCheck('이미 사용 중인 닉네임입니다.');
-        } else {
-          setNicknameCheck('사용 가능한 닉네임입니다.');
-        }
-      } else {
-        setNicknameCheck('중복 확인 중 오류가 발생했습니다.');
-      }
-    } catch (error) {
-      console.error('중복 확인 중 오류:', error);
-  setNicknameCheck(`중복 확인 중 오류가 발생했습니다. 오류 메시지: ${error.message}`);
-    }
-  };
-
-  const [emailCheck, setEmailCheck] = useState('');
-
-  const handleEmailCheck = async () => {
-    if (email.trim() === '') { // 이메일이 공백인 경우
-      setEmailCheck('이메일을 입력해주세요.');
-      return;
-    }
-
-    let formData = new FormData();
-    formData.append('email', email);
-    
-    try {
-      const response = await fetch(`${apiUrl}/check/email`, {
-        method: 'POST',
-        body: formData,
-      });
-  
-      if (response.ok) {
-        const resultJSON = await response.json(); // JSON 데이터로 변환
-        const result = resultJSON === 'false' ? false : resultJSON; // 문자열 'false'를 불리언 false로 변환
-  
-        if (result === false) {
-          setEmailCheck('이미 사용 중인 이메일입니다.');
-        } else {
-          setEmailCheck('사용 가능한 이메일입니다.');
-        }
-      } else {
-        setEmailCheck('중복 확인 중 오류가 발생했습니다.');
-      }
-    } catch (error) {
-      setEmailCheck('중복 확인 중 오류가 발생했습니다.');
-    }
-  };
-
-  const [phoneNumberCheck, setPhoneNumberCheck] = useState('');
-
-  const handlePhoneNumberCheck = async () => {
-    if (phoneNumber.trim() === '') { // 휴대폰 번호가 공백인 경우
-      setPhoneNumberCheck('휴대폰 번호를 입력해주세요.');
-      return;
-    }
-
-    let formData = new FormData();
-    formData.append('phoneNumber', phoneNumber);
-    
-    try {
-      const response = await fetch(`${apiUrl}/check/phone-number`, {
-        method: 'POST',
-        body: formData,
-      });
-      console.log('response:', response);
-  
-      if (response.ok) {
-        const resultJSON = await response.json(); // JSON 데이터로 변환
-        const result = resultJSON === 'false' ? false : resultJSON; // 문자열 'false'를 불리언 false로 변환
-  
-        if (result === false) {
-          setPhoneNumberCheck('이미 사용 중인 휴대폰 번호입니다.');
-        } else {
-          setPhoneNumberCheck('사용 가능한 휴대폰 번호입니다.');
-        }
-      } else {
-        setPhoneNumberCheck('중복 확인 중 오류가 발생했습니다.');
-      }
-    } catch (error) {
-      setPhoneNumberCheck('중복 확인 중 오류가 발생했습니다.');
-    }
-  };
-
-  const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [passwordMatchMessage, setPasswordMatchMessage] = useState('');
-
-  const handlePasswordCheck = () => {
-    if (password === passwordConfirm) {
-      setPasswordMatchMessage('비밀번호가 일치합니다.');
-    } else {
-      setPasswordMatchMessage('비밀번호가 일치하지 않습니다.');
-    }
+    console.log('')
   };
 
   const isFormValid = (
@@ -262,9 +153,9 @@ const SignupScreen2 = ({navigation}) => {
     emailCheck === '사용 가능한 이메일입니다.' &&
     phoneNumberCheck === '사용 가능한 휴대폰 번호입니다.'
   );
-  
-    return (
-      <KeyboardAvoidingView
+
+  return (
+    <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
@@ -280,7 +171,7 @@ const SignupScreen2 = ({navigation}) => {
               value={nickname}
               onChangeText={text => setNickname(text)}>
             </TextInput>
-            <TouchableOpacity style={styles.smallbutton} onPress={handleNickNameCheck}>
+            <TouchableOpacity style={styles.smallbutton} onPress={() => handleNickNameCheck(nickname, setNicknameCheck)}>
               <Text style={styles.smallbuttonText}>중복확인</Text>
             </TouchableOpacity>
           </View>
@@ -298,14 +189,14 @@ const SignupScreen2 = ({navigation}) => {
                   value={email}
                   onChangeText={text => setEmail(text)}>
           </TextInput>
-          <TouchableOpacity style={styles.smallbutton} onPress={handleEmailCheck}>
-              <Text style={styles.smallbuttonText}>중복확인</Text>
+          <TouchableOpacity style={styles.smallbutton} onPress={() => { handleEmailCheck(email, setEmailCheck); }}>
+              <Text style={styles.smallbuttonText}>이메일 인증</Text>
           </TouchableOpacity>
           </View>
           <View>
             <Text style={{ color: 'red' }}>{emailCheck}</Text>
           </View>
-
+          
           <TextInput style={styles.input} 
                   placeholder='비밀번호(Password)'
                   placeholderTextColor='grey'
@@ -325,7 +216,7 @@ const SignupScreen2 = ({navigation}) => {
                   value={passwordConfirm}
                   onChangeText={text => setPasswordConfirm(text)}>
           </TextInput>
-          <TouchableOpacity style={styles.smallbutton} onPress={handlePasswordCheck}>
+          <TouchableOpacity style={styles.smallbutton} onPress={() => handlePasswordCheck(password, passwordConfirm, setPasswordMatchMessage)}>
               <Text style={styles.smallbuttonText}>확인</Text>
           </TouchableOpacity>
           </View>
@@ -340,7 +231,7 @@ const SignupScreen2 = ({navigation}) => {
                   value={phoneNumber}
                   onChangeText={text => setPhoneNumber(text)}>
             </TextInput>
-            <TouchableOpacity style={styles.smallbutton} onPress={handlePhoneNumberCheck}>
+            <TouchableOpacity style={styles.smallbutton} onPress={() => handlePhoneNumberCheck(phoneNumber, setPhoneNumberCheck)}>
               <Text style={styles.smallbuttonText}>중복확인</Text>
             </TouchableOpacity>
           </View>

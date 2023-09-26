@@ -241,7 +241,7 @@ const MapScreen = ({ navigation }) => {
                   </View>
               </View>
               <View style={{flexDirection: "row", marginBottom:10, alignItems: "center", alignSelf: "center"}}>
-                <Text style={{fontWeight:"bold", fontSize:15, marginLeft:10, marginRight:20}} numberOfLines={1}>현재 위치에서 {calculateDistance()}에 있음</Text>
+                <Text style={{fontWeight:"bold", fontSize:15, marginLeft:15, marginRight:25}} numberOfLines={1}>현재 위치에서 {calculateDistance()}에 있음</Text>
                 <TouchableOpacity style={{backgroundColor:"red", borderRadius: 5, padding:5}}><Text style={{color:"white"}}>    3{"\n"}   min   </Text></TouchableOpacity>
               </View>
               <View style={{flexDirection: "row", marginBottom:10, alignItems: "center", alignSelf: "center"}}>
