@@ -135,6 +135,7 @@ const SignupScreen2 = ({navigation}) => {
         navigation.navigate('stackSignup3');
       } else {
         const errorData = await response.json(); 
+        console.log(errorData);
         console.error('회원가입 실패: ', `${errorData.message}`);
       }
     } catch (error) {

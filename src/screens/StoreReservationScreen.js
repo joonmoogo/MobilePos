@@ -1,20 +1,36 @@
-import React from 'react';
-import { TouchableOpacity, StyleSheet, Text, View, Dimensions } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { TouchableOpacity, StyleSheet, Text, View, Dimensions,Image } from 'react-native';
 import ReservationDetail from '../components/ReservationDetail';
+import { getData } from '../utils/asyncStorageService';
+import { getStoreById } from '../utils/storeHandler';
+import { getMenus } from '../utils/menuHandler';
+import { clientApiUrl } from '../config';
 
 const StoreReservationScreen = ({navigation}) => {
+  useEffect(()=>{
+    
+    getData('hknuToken').then((token)=>{
+      getData('clickedStore').then((storeId)=>{
+        console.log(storeId);
+        getStoreById(storeId,token).then((data)=>{
+          console.log(data);
+          setStore(data);
+        })
+      })  
+    })
+  },[])
+
+  const [store,setStore] = useState(undefined); 
     return (
         <View style={styles.container}>
             <View style={{width: Dimensions.get('window').width, flexDirection: 'row', alignSelf: 'flex-start', borderBottomWidth: 1, borderBottomColor: 'lightgray',}}>
-                <TouchableOpacity style={styles.profileImage}></TouchableOpacity>
-                <Text style={{alignSelf:'center', fontSize:25}}>한스델리 안성점</Text>
+                <Image source={{
+                  uri: `${clientApiUrl}/serverImage/${store?.profilePhoto}`,
+                }} style={styles.profileImage}></Image>
+                <Text style={{alignSelf:'center', fontSize:25}}>{store?.name }</Text>
             </View>
             <ReservationDetail />
-            <View>
-              <TouchableOpacity style={styles.nextButton} onPress={() => navigation.navigate('stackReservation')}>
-                <Text style={{alignSelf: 'center', color: 'white', fontSize: 25}}>예약 신청</Text>
-              </TouchableOpacity>
-            </View>
+            
         </View>
     )
 }

@@ -3,6 +3,11 @@ import { ScrollView, TextInput, Text, Image, StyleSheet, TouchableOpacity, View,
 import { Switch } from "@react-native-material/core";
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import SMSVerification, { sendVerificationCode, verifyCode } from '../components/SMSVerification';
+import { useEffect } from 'react';
+import { editUser, getUser } from '../utils/userHandler';
+import { getData } from '../utils/asyncStorageService';
+import { apiUrl,clientApiUrl } from '../config';
+
 
 const ProfileScreen = () => {
   const [img, setImageSource] = useState("");
@@ -10,7 +15,22 @@ const ProfileScreen = () => {
   const defaultImg = 'https://awildgeographer.files.wordpress.com/2015/02/john_muir_glacier.jpg';
   const [checked, setChecked] = useState(true);
   const [checked1, setChecked1] = useState(true);
+  const [info,setInfo] = useState();
+  const [token,setToken] = useState();
+  const [imageInfo,setImageInfo]= useState();
 
+
+  useEffect(()=>{
+    
+    getData('hknuToken').then((token)=>{
+      setToken(token);
+      getUser(token).then((data)=>{
+        console.log(data);
+        setInfo(data);
+      })
+    })
+    // getUser()
+  },[])
   function openGallery() {
     const options = {
       mediaType: 'photo',
@@ -19,7 +39,7 @@ const ProfileScreen = () => {
     };
 
     launchImageLibrary(options, (response) => {
-      console.log('Response = ', response);
+      // console.log('Response = ', response);
 
       if (response.didCancel) {
         console.log('User cancelled image picker');
@@ -27,8 +47,20 @@ const ProfileScreen = () => {
         console.log('ImagePicker Error: ', response.errorMessage);
       } else {
         setImageSource(response.assets[0].uri);
+        console.log(response.assets[0].uri);
+        console.log(response);
+        const infos = {
+          nickname:info?.nickname,
+          phoneNumber:info?.phoneNumber,
+          profilePhoto:response,
+        }
+        console.log(infos);
+        editUser(infos,token).then((data)=>{
+          console.log(data);
+        })
       }
       setModalVisible(false);
+      
     });
     
   };
@@ -41,7 +73,7 @@ const ProfileScreen = () => {
     };
 
     launchCamera(options, (response) => {
-      console.log('Response = ', response);
+      // console.log('Response = ', response);
 
       if (response.didCancel) {
         console.log('User cancelled image picker');
@@ -67,7 +99,7 @@ const ProfileScreen = () => {
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
           <TouchableOpacity style={styles.profileImage} onPress={openModal}>
-            <Image source={{ uri: img || defaultImg }} style={styles.profileImage} />
+            <Image source={{ uri: img || `${clientApiUrl }/serverImage/${info?.profilePhoto}` }} style={styles.profileImage} />
           </TouchableOpacity>
           <Modal
             animationType="slide"
@@ -98,13 +130,15 @@ const ProfileScreen = () => {
         <View style={styles.container}>
           <TextInput style={styles.nameInput}
                   placeholder='kwn01081'
+                  value={info?.nickname}
                   placeholderTextColor='grey'></TextInput>
         </View>
       
         <View style={{flexDirection: 'row', marginBottom:15}}>
-          <Text style={{color: 'black', marginTop:10, marginRight:20}}>이메일          </Text>
+          <Text style={{color: 'black', marginTop:10, marginRight:20}}>이메일</Text>
           <TextInput style={styles.input}
           placeholder='kwn01081@gmail.com'
+          value={info?.email}
           placeholderTextColor='grey'></TextInput>
         </View>
 
@@ -112,6 +146,7 @@ const ProfileScreen = () => {
           <Text style={{color: 'black', marginTop:10, marginRight:20}}>현재 비밀번호</Text>
           <TextInput style={styles.input}
           placeholder='!password123'
+          
           placeholderTextColor='grey'
           secureTextEntry></TextInput>
         </View>
@@ -130,7 +165,8 @@ const ProfileScreen = () => {
         <View style={{flexDirection: 'row', marginTop:15}}>
           <Text style={{color: 'black', marginTop:10, marginRight:20}}>휴대폰         </Text>
           <TextInput style={styles.input}
-          placeholder='01083455272'
+          placeholder=''
+          value={info?.phoneNumber}
           placeholderTextColor='grey'></TextInput>
         </View>
 

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Image, Text, TextInput, Alert, Button, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Image, Text, TextInput, Alert, Button, View, StyleSheet, TouchableOpacity,Linking } from 'react-native';
 import NaverLogin, { NaverLoginResponse, GetProfileResponse } from '@react-native-seoul/naver-login';
 import  * as KakaoLogin from '@react-native-seoul/kakao-login';
+import { apiUrl } from '../config';
+import { storeData,removeData,getData } from '../utils/asyncStorageService';
 
 const consumerKey = 'x51vRYca8cKf7z7nyHKH';
 const consumerSecret = '957js3o85L';
 const appName = 'MobilePos';
 const serviceUrlScheme = 'yourappurlscheme';
-const apiUrl = 'http://192.168.0.21:8082';
 
 const LoginScreen = ({navigation}) => {
   const [success, setSuccessResponse] = useState();
@@ -31,6 +32,8 @@ const LoginScreen = ({navigation}) => {
         setEmail('');
         setPassword('');
         setLoginError('');
+        const token = response.headers.map.access_token;
+        storeData('hknuToken',token);
         navigation.navigate('stackList');
       } else {
         setLoginError('다시 시도해 주세요');

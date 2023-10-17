@@ -1,56 +1,67 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, Text, View, Dimensions, TouchableOpacity } from 'react-native';
+import { ScrollView, StyleSheet, View, Text, Dimensions, TouchableOpacity } from 'react-native';
 import StoreCard from '../card/StoreCard';
 import goodRestaurants from '../../assets/goodrestaurants.json';
-
-const AllMenuComponent = ({navigation}) => {
+import { getStoreByCoordinate } from '../../utils/storeHandler';
+import { getData, storeData } from '../../utils/asyncStorageService';
+import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { Image, Tab, TabView, Card } from '@rneui/themed';
+import { apiUrl, clientApiUrl } from '../../config';
+import { subscribe } from '../../utils/notificationHandler';
+import { EventSourcePolyfill,EventSource } from 'event-source-polyfill';
+const AllMenuComponent = ({ navigation }) => {
   const [stores, setStores] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const updatedStores = goodRestaurants.map(item => ({ title: item.BIZEST_NM }));
-        setStores(updatedStores);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-    fetchData();
+    getData('stores').then((data) => {
+      setStores(data);
+      console.log(data);
+    });
+    // getData('hknuToken').then((token)=>{
+    //   const EventSource = EventSourcePolyfill;
+    //   const source = new EventSource(`${apiUrl}/notifications/subscribe`,{headers:{'access_token':token},heartbeatTimeout:86400000})
+    //     source.addEventListener('SERVER_CONNECT',(e)=>{
+    //         console.log(e);
+    //     })
+    //   })
+    
+    
   }, []);
 
-  const storeList = stores.slice(0, 20).map((store, index) => (
-    <StoreCard key={index} title={store.title} />
-  ));
-
   return (
-    <View>
-      <View>
-        <ScrollView>
-            <View>
-              <TouchableOpacity onPress={() => navigation.navigate("stackDetail")}>
-                <Text style={styles.storebox}>한스델리 안성점{"\n"}</Text>
-              </TouchableOpacity>
-            </View>
-            {storeList}
-        </ScrollView>
-      </View>
-    </View>
+    <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      {stores.map((e, i) => {
+        return (
+          <View key={e.id}>
+            <TouchableOpacity
+              onPress={() => {
+                console.log(e.id);
+                storeData('clickedStore', e.id).then(() => {
+                  console.log('clickedStore was stored', e.id);
+                  navigation.navigate('stackDetail');
+                });
+              }}
+            >
+              <Card>
+                <Image
+                  style={{ borderRadius: 10, marginLeft: 20, height: 120, width: 250 }}
+                  source={{ uri: `${clientApiUrl}/serverImage/${e?.profilePhoto}` }}
+                ></Image>
+                <Text style={{ marginLeft: 20, fontWeight: 'bold', fontSize: 20, color: 'black' }}>{e.name}</Text>
+                <Text style={{ marginLeft: 20 }}>{e.address}</Text>
+              </Card>
+            </TouchableOpacity>
+          </View>
+        );
+      })}
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-    storebox: {
-      alignSelf: 'center',
-      width: Dimensions.get('window').width - 28,
-      height: 110,
-      marginTop: 10,
-      fontSize: 25,
-      color: 'black',
-      padding: 15,
-      borderWidth: 1,
-      borderColor: 'lightgrey',
-      fontWeight: 'bold'
-    }
-  });
-  
+  scrollViewContent: {
+    paddingBottom: 20, // 스크롤뷰의 아래에 추가적인 여백을 주면 끝까지 스크롤됩니다.
+  },
+});
+
 export default AllMenuComponent;

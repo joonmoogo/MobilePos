@@ -1,22 +1,39 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, Animated, TouchableOpacity, TextInput, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, Animated, TouchableOpacity, TextInput, Dimensions, ImageBackground } from 'react-native';
+import { apiUrl, clientApiUrl } from '../config';
 import { WebView } from 'react-native-webview';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Geolocation from '@react-native-community/geolocation';
 import * as geolib from 'geolib';
 import goodRestaurantsData from '../assets/goodrestaurants.json';
+import { getData, storeData } from '../utils/asyncStorageService';
+import { getStoreByCoordinate } from '../utils/storeHandler';
+import { Image} from '@rneui/themed';
+import { getOrderByStoreId } from '../utils/orderHandler';
+import { useIsFocused } from '@react-navigation/native';
+
+
 
 const MapScreen = ({ navigation }) => {
   const [isInfoVisible, setInfoVisible] = useState(false);
   const infoAnimation = useState(new Animated.Value(0))[0];
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [latitude, setLatitude] = useState();
+  const [longitude, setLongitude] = useState();
   const [selectedMarkerData, setSelectedMarkerData] = useState(null);
+  const [token, setToken] = useState();
   const webViewRef = useRef(null);
+  const [newgoodRestaurantsData, setNewGoodRestaurantsData] = useState([]); // 초기 상태는 빈 배열
+  const [storeStatus,setStoreStatus] = useState();
+  const isFocused = useIsFocused();
 
   const handleMarkerClick = (markerData) => {
     if (markerData) {
       setSelectedMarkerData(markerData);
+      getOrderByStoreId(markerData.id,token).then((data)=>{
+        setStoreStatus(data.length);
+      })
       setInfoVisible(true);
       Animated.timing(infoAnimation, {
         toValue: 1,
@@ -45,25 +62,41 @@ const MapScreen = ({ navigation }) => {
     }
   }, [selectedMarkerData]);
 
-  const infoTranslateY = infoAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [250, 0],
-  });
-
   const getCurrentLocation = () => {
     Geolocation.getCurrentPosition(
       position => {
         const { latitude, longitude } = position.coords;
         setCurrentLocation({ latitude, longitude });
         console.log('Current Location:', latitude, longitude);
+        setLatitude(latitude);
+        setLongitude(longitude);
+        getData('hknuToken').then((data) => {
+          setToken(data);
+          console.log(data);
+          getStoreByCoordinate(latitude, longitude, 1000000000000, data).then((data) => {
+            storeData('stores', data);
+            data.map((e, i) => {
+              const store = {
+                BIZEST_NM: e.name,
+                REFINE_WGS84_LAT: e.longitude,
+                REFINE_WGS84_LOGT: e.latitude,
+                photo : e.profilePhoto,
+                id:e.id,
+              }
+              console.log(store);
+              setNewGoodRestaurantsData((prevData) => [...prevData, store]);
+            });
+          }).catch((error)=>{return error})
+        });
       },
       error => {
         console.log(error.message);
-      }
+      },
     );
   };
 
   const syncLocation = () => {
+    console.log(navigation);
     getCurrentLocation();
     if (webViewRef.current && currentLocation) {
       webViewRef.current.injectJavaScript(`
@@ -78,11 +111,20 @@ const MapScreen = ({ navigation }) => {
   };
 
   useEffect(() => {
-    getCurrentLocation();
-  }, []);
+    if(isFocused){
+      getCurrentLocation();
+    }
+    
+  }, [isFocused]);
+
+  const infoTranslateY = infoAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [250, 0],
+  });
 
   const handleWebViewMessage = (event) => {
     const message = event.nativeEvent.data;
+    console.log(message);
     if (message === 'markerClicked') {
       handleMarkerClick();
     } else {
@@ -109,16 +151,9 @@ const MapScreen = ({ navigation }) => {
     return null;
   };
 
-  const randomRating = (Math.random() * 5).toFixed(1);
 
-  const exampleMarkerData= {
-    BIZEST_NM: '한스델리 안성점',
-    REFINE_WGS84_LAT: 37.0113,
-    REFINE_WGS84_LOGT: 127.2650
-  };
 
-  const newgoodRestaurantsData = goodRestaurantsData.concat(exampleMarkerData);
-
+  // JSON 데이터를 문자열로 변환
   const jsonDataString = JSON.stringify(newgoodRestaurantsData);
 
   const htmlContent = `
@@ -182,8 +217,7 @@ const MapScreen = ({ navigation }) => {
             anothermarkers[j].setMap(map);
           }
 
-          marker.setMap(map);
-          mainmarker.setMap(map);
+          marker.setMap(map);         
 
           kakao.maps.event.addListener(mainmarker, 'click', function() {
             window.ReactNativeWebView.postMessage('markerClicked');
@@ -196,9 +230,11 @@ const MapScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.inputcontainer}>
-        <TextInput style={styles.input} placeholder='Search'></TextInput>
+        <TextInput style={styles.input} placeholder='Search' onChange={() => {
+
+        }}></TextInput>
       </View>
-      
+
       <WebView
         ref={webViewRef}
         source={{ html: htmlContent }}
@@ -210,54 +246,65 @@ const MapScreen = ({ navigation }) => {
           <MaterialIcons name="my-location" size={25} color="white" />
         </TouchableOpacity>
       </View>
+      
       <Animated.View
-        style={[ styles.infoContainer, { transform: [{ translateY: infoTranslateY }], flex: 1 } ]}>
+        style={[ styles.infoContainer, { transform: [{ translateY: infoTranslateY }], flex: 1 ,} ]}>
         <View style={{flexDirection: "row", marginBottom:10}}>
-          <Text style={{marginRight: 320}}>Location</Text>
-          <TouchableOpacity onPress={closeInfo}><MaterialIcons name="cancel" size={20} /></TouchableOpacity>
+          
+          <TouchableOpacity style={{position:'absolute'}} onPress={closeInfo}><MaterialIcons name="cancel" size={20} /></TouchableOpacity>
         </View>
+       
         {selectedMarkerData && (
-          <View style={{flexDirection:"row"}}>
-            <View style={{alignSelf:"center"}}>
-              <TouchableOpacity style={styles.profileImage}>
-              </TouchableOpacity>
-            </View>
+          
+          <View style={{flexDirection:"row",left:55,}}>
+            
             <View>
-              <View style={{marginBottom:10, alignItems: "center"}}>
-                <Text style={{fontSize: 25, maxWidth: 300}} numberOfLines={1} ellipsizeMode="tail">{selectedMarkerData.BIZEST_NM}</Text>
+            <TouchableOpacity onPress={()=>{
+                  storeData('clickedStore', selectedMarkerData.id).then(() => {
+                  navigation.navigate('stackDetail');
+                });}}>
+              <Image style={{height:90,width:'100%',}} source={{ uri: `${clientApiUrl}/serverImage/${selectedMarkerData.photo}` }}></Image>
+              <View style={{ alignItems: "center"}}>
+                <Text  style={{fontSize: 25,color:'black',fontWeight:'bold' }} numberOfLines={1} ellipsizeMode="tail">{selectedMarkerData.BIZEST_NM}</Text>
                   <View style={{flexDirection: "row", alignItems: "center"}}>
-                    <Text style={{fontSize: 15}}>{randomRating}</Text>
+                    <Text style={{fontSize: 15}}>5</Text>
                     <View style={{flexDirection: 'row'}}>
                       {[1, 2, 3, 4, 5].map((idx) => (
                         <FontAwesome
                           key={idx}
                           name="star"
                           size={15}
-                          color={idx <= randomRating ? 'gold' : 'lightgray'}
+                          color='gold'
                           style={{ marginLeft: 5 }}
                         />
                       ))}
                     </View>
                   </View>
               </View>
-              <View style={{flexDirection: "row", marginBottom:10, alignItems: "center", alignSelf: "center"}}>
+              </TouchableOpacity>
+              <View style={{flexDirection: "row",  alignItems: "center", alignSelf: "center"}}>
                 <Text style={{fontWeight:"bold", fontSize:15, marginLeft:15, marginRight:25}} numberOfLines={1}>현재 위치에서 {calculateDistance()}에 있음</Text>
-                <TouchableOpacity style={{backgroundColor:"red", borderRadius: 5, padding:5}}><Text style={{color:"white"}}>    3{"\n"}   min   </Text></TouchableOpacity>
+                
               </View>
-              <View style={{flexDirection: "row", marginBottom:10, alignItems: "center", alignSelf: "center"}}>
+              <View style={{flexDirection: "row",  alignItems: "center", alignSelf: "center"}}>
                 <View style={{alignItems: "center", marginRight:10}}>
-                  <MaterialIcons name="alarm" size={35}></MaterialIcons>
+                  <MaterialIcons color='skyblue' name="alarm" size={30} ></MaterialIcons>
                   <Text>예약 가능</Text>
                 </View>
                 <View style={{alignItems: "center", marginRight:10}}>
-                  <MaterialIcons name="sentiment-satisfied-alt" size={35}></MaterialIcons>
-                  <Text>혼밥 가능</Text>
+                  <MaterialIcons color='gold' name="sentiment-satisfied-alt" size={30}></MaterialIcons>
+                  <Text>요즘 맛집 </Text>
                 </View>
-                <View style={{alignItems: "center"}}>
-                  <MaterialIcons name="people" size={35}></MaterialIcons>
-                  <Text>단체 가능</Text>
+                
+                <View style={{alignItems: "center", marginRight:10}}>
+                  <MaterialIcons color={storeStatus&&storeStatus>10?"orange":"green"} name="people" size={30}></MaterialIcons>
+                  <Text>{storeStatus&&storeStatus>10?"주문 많음":"한적함"}</Text>
                 </View>
-                <TouchableOpacity style={{marginLeft: 20, backgroundColor:"deepskyblue", borderRadius: 5, padding:5}} onPress={() => navigation.navigate("stackDetail")}><Text style={{color:"white"}}>  예약{"\n"}  하기  </Text></TouchableOpacity>
+                {/* {storeStatus?<View style={{alignItems: "center", marginRight:10}}>
+                  <MaterialIcons color={storeStatus&&storeStatus>10?"orange":"green"} name="bulb" size={30}></MaterialIcons>
+                  <Text>{storeStatus?"영업 중":null}</Text>
+                </View>:null}
+                 */}
               </View>
             </View>
           </View>
@@ -300,8 +347,8 @@ const styles = StyleSheet.create({
     padding: 15
   },
   profileImage: {
-    width: 125,
-    height: 125,
+    width: 50,
+    height: 50,
     borderRadius: 80,
     backgroundColor:"lightgrey",
     margin: 10

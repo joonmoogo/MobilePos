@@ -11,7 +11,7 @@ const Drawer = createDrawerNavigator();
 
 const DrawerNavigator = () => {
   return (
-    <Drawer.Navigator drawerContent={(props) => <DrawerContent {...props} />} screenOptions={{ headerTitle: 'MobilePos' }}>
+    <Drawer.Navigator drawerContent={(props) => <DrawerContent {...props} />} screenOptions={{ headerTitle: 'Mobile app' }}>
       <Drawer.Screen name="ListScreen" component={ListTab} />
       <Drawer.Screen name="MapScreen" component={MapTab} />
       <Drawer.Screen name="LoginScreen" component={LoginStack} />

@@ -119,20 +119,15 @@ const DrawerContent = props => {
                   <Text style={styles.subMenuLabel}>중식</Text>
                 </TouchableOpacity>
                 <TouchableOpacity>
-                  <Text style={styles.subMenuLabel}>일식 돈가스</Text>
+                  <Text style={styles.subMenuLabel}>일식 </Text>
                 </TouchableOpacity>
                 <TouchableOpacity>
                   <Text style={styles.subMenuLabel}>양식</Text>
                 </TouchableOpacity>
                 <TouchableOpacity>
-                  <Text style={styles.subMenuLabel}>동남아</Text>
-                </TouchableOpacity>
-                <TouchableOpacity>
                   <Text style={styles.subMenuLabel}>분식</Text>
                 </TouchableOpacity>
-                <TouchableOpacity>
-                  <Text style={styles.subMenuLabel}>혼밥</Text>
-                </TouchableOpacity>
+
               </View>
             )}
 

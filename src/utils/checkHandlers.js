@@ -27,9 +27,11 @@
         }
       } else {
         setNicknameCheck('중복 확인 중 오류가 발생했습니다.');
+        console.log(response);
       }
     } catch (error) {
       setNicknameCheck(`중복 확인 중 오류가 발생했습니다. 오류 메시지: ${error.message}`);
+      throw error
     }
   };
   
@@ -79,9 +81,12 @@
       const response = await fetch(`${apiUrl}/check/phone-number`, {
         method: 'POST',
         body: formData,
-      });
+      }).then((data)=>{
+        console.log(data);
+      })
   
       if (response.ok) {
+        console.log(response);
         const result = await response.json();
   
         if (result === true) {

@@ -1,8 +1,9 @@
 import React from 'react';
 import { StyleSheet, View, Button } from 'react-native';
 import { Text, Card } from '@rneui/themed';
+import { clientApiUrl } from '../../config';
 
-const OrderMenuCard = ({ title, text, count, increaseCount, decreaseCount }) => {
+const OrderMenuCard = ({ title, text, count, increaseCount, decreaseCount, menu }) => {
   return (
     <Card wrapperStyle={styles.card}>
       <View style={styles.container}>
@@ -19,7 +20,7 @@ const OrderMenuCard = ({ title, text, count, increaseCount, decreaseCount }) => 
       <Card.Image
         style={styles.image}
         source={{
-          uri: 'https://awildgeographer.files.wordpress.com/2015/02/john_muir_glacier.jpg',
+          uri: `${clientApiUrl}/serverImage/${menu.photo}`,
         }}
       />
     </Card>

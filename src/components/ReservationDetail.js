@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef,useEffect } from 'react';
 import { StyleSheet, View, ScrollView, Text, TouchableOpacity, Dimensions } from 'react-native';
 import OrderMenuCard from '../components/card/OrderMenuCard';
 import DatePicker from 'react-native-date-picker';
@@ -6,49 +6,53 @@ import ScrollPicker from 'react-native-wheel-scrollview-picker';
 import { menus } from '../screens/DetailScreen';
 import moment from 'moment';
 import { SelectList } from 'react-native-dropdown-select-list';
+import { getData } from '../utils/asyncStorageService';
+import { getStoreById } from '../utils/storeHandler';
+import { getMenus } from '../utils/menuHandler';
+import { getTableById } from '../utils/tableHandler';
+import { getOrder, getOrderByStoreId, saveReservation } from '../utils/orderHandler';
+import { saveOrderDetail } from '../utils/orderDetailHandler';
+
 
 const ReservationDetail = () => {
+  
+  
+  useEffect(()=>{
+    getData('hknuToken').then((token)=>{
+      setToken(token);
+      getData('clickedStore').then((storeId)=>{
+        console.log(storeId);
+        setStoreId(storeId);
+
+        getMenus(storeId,token).then((data)=>{
+          data.map((e,i)=>{
+            e.count=0;
+          })
+          setMenus(data);
+          console.log(data);
+        })
+        getTableById(storeId,token).then((data)=>{
+          console.log(data);
+          const tables =[]
+          data.map((e,i)=>{
+            tables.push((e.id));
+          })
+          
+          setTables(tables);
+          console.log(tables);
+
+        })
+      })  
+    })
+  },[])
+  const [token,setToken] = useState();
+  const [storeId,setStoreId] = useState();
+  const [tables,setTables] = useState();
   const [selectedOption, setSelectedOption] = useState(null);
   const [date, setDate] = useState(new Date());
   const [people, setPeople] = useState(1);
-  const [menus, setMenus] = useState([
-    {
-      title: '돈까스',
-      text: '육즙이 잘좔좔....겉바속촉 감동의 맛.... 손님 울었음\n가격 13,000원',
-      price: 13000,
-      count: 0
-    },
-    {
-      title: '파스타',
-      text: '이것이 마약 파스타\n대마 함유\n가격 12,000원',
-      price: 12000,
-      count: 0
-    },
-    {
-      title: '치킨',
-      text: '육즙이 잘좔좔....겉바속촉 감동의 맛.... 손님 울었음\n가격 13,000원',
-      price: 13000,
-      count: 0
-    },
-    {
-      title: '토스트',
-      text: '이것이 마약 파스타\n대마 함유\n가격 12,000원',
-      price: 12000,
-      count: 0
-    },
-    {
-      title: '옥수수',
-      text: '육즙이 잘좔좔....겉바속촉 감동의 맛.... 손님 울었음\n가격 13,000원',
-      price: 13000,
-      count: 0
-    },
-    {
-      title: '햄버거',
-      text: '이것이 마약 파스타\n대마 함유\n가격 12,000원',
-      price: 13000,
-      count: 0
-    },
-  ]);
+  const [table,setTable] = useState(1);
+  const [menus, setMenus] = useState([]);
   const [isSelected, setSelected] = useState("");
     const data = [
         {key: '1', value:'등록된 카드 1'},
@@ -82,9 +86,11 @@ const ReservationDetail = () => {
   };
 
   const menuList = menus.map((menu, index) => (
+        
         <OrderMenuCard
+          menu={menu}
           key={index}
-          title={menu.title}
+          title={menu.name}
           text={menu.text}
           price={menu.price}
           count={menu.count}
@@ -96,7 +102,7 @@ const ReservationDetail = () => {
   const totalPrice = menus
       .filter((menu) => menu.count !== 0)
       .reduce((total, menu) => total + menu.count * menu.price, 0);
-      
+        
   function formatNumberWithCommas(number) {
     return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
@@ -104,6 +110,7 @@ const ReservationDetail = () => {
   const formattedTotalPrice = formatNumberWithCommas(totalPrice);
 
   return (
+    <>
     <ScrollView style={styles.container}>
       <View style={{flexDirection: "row"}}>
         <TouchableOpacity onPress={() => handleOptionClick('time')}>
@@ -135,14 +142,21 @@ const ReservationDetail = () => {
           />
         </View>
       )}
-
+      <View style={{flexDirection: "row"}}>
       <TouchableOpacity onPress={() => handleOptionClick('table')}>
         <Text style={styles.titleButton}>   테이블 선택</Text>
       </TouchableOpacity>
+      <Text style={{alignSelf: "center"}}>{table}번</Text>
+      </View>
 
       {selectedOption === 'table' && (
         <View style={{marginBottom: 20}}>
-          <Text>테이블 선택 내용</Text>
+          <ScrollPicker
+            dataSource={tables}
+            selectedIndex={table-1}
+            onValueChange={setTable}
+            wrapperColor='#FFFFFF'
+          />
         </View>
       )}
 
@@ -151,8 +165,8 @@ const ReservationDetail = () => {
           <Text style={styles.titleButton}>   메뉴 선택   </Text>
         </TouchableOpacity>
         <Text style={{alignSelf: "center", fontSize: 15}}>{menus
-          .filter((menu) => menu.count !== 0) // count가 0이 아닌 메뉴들만 필터링
-          .map((menu) => `${menu.title} ${menu.count}`)
+          .filter((menu) => menu?.count !== 0) // count가 0이 아닌 메뉴들만 필터링
+          .map((menu) => `${menu.name} ${menu.count}`)
           .join(", ")}
         </Text>
       </View>
@@ -172,7 +186,8 @@ const ReservationDetail = () => {
 
       {selectedOption === 'payment' && (
         <View style={{marginBottom: 20, flexDirection: "row"}}>
-          <Text style={{marginLeft: 30, marginRight:20, fontSize: 15, alignSelf: "center"}}>등록된 카드 </Text>
+          <Text style={{marginLeft: 30, marginRight:20, fontSize: 15, alignSelf: "center"}}
+          >등록된 카드 </Text>
           <SelectList
                     setSelected={(val) => setSelected(val)} 
                     defaultOption={{ key:'1', value:'등록된 카드 1' }}
@@ -185,7 +200,56 @@ const ReservationDetail = () => {
                 </SelectList>
         </View>
       )}     
+      
     </ScrollView>
+    <View>
+    <TouchableOpacity style={styles.nextButton} onPress={()=>{
+      // console.log(
+      //   {
+      //     storeId:store.id,
+      //     tableId:'tableId',
+      //     reservationTime:'timeStamp',
+      //     orderCode:'RESERVATION',
+      //   }
+      // )
+      
+    }}>
+      <Text style={{alignSelf: 'center', color: 'white', fontSize: 25}} onPress={()=>{
+        const parsedDate = new Date(formattedDate);
+        const newDate = parsedDate.toISOString().replace('T', ' ').split('.')[0];
+        const info = 
+          {
+            storeId:parseInt(storeId),
+            tableId:parseInt(table),
+            reservationTime:newDate,
+            orderCode:'RESERVATION_WAIT'
+          }
+        const selectedMenu = menus.filter(item => item.count !==0);
+
+
+        
+        
+        saveReservation(info,token).then((data)=>{
+          getOrderByStoreId(storeId,token).then((data)=>{
+            console.log(data);
+            selectedMenu.forEach((e)=>{
+              const menuInfo = {
+                orderId : data[0].id,
+                menuId : e.id,
+                amount : e.count
+              }
+              saveOrderDetail(menuInfo,token).then((data)=>{
+                console.log(data);
+              })
+              alert('예약 신청 완료');
+            })
+            
+          })
+        })
+      }}>예약 신청</Text>
+    </TouchableOpacity>
+  </View>
+  </>
   );
 };
 
@@ -197,9 +261,20 @@ const styles = StyleSheet.create({
         width: Dimensions.get('window').width
     },
     titleButton: {
-        fontSize: 40,
+        fontSize: 28,
         marginBottom: 20
     },
+    nextButton: {
+      marginTop: 20,
+      marginBottom: 40,
+      width: Dimensions.get('window').width - 100,
+      height: 60,
+      borderRadius: 10,
+      fontSize: 30,
+      backgroundColor: 'red',
+      alignSelf: 'center',
+      justifyContent:'center'
+  },
   });
 
 export default ReservationDetail;

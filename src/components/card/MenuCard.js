@@ -1,12 +1,14 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text, Card } from '@rneui/themed';
+import { clientApiUrl } from '../../config';
 
 const MenuCard = props => {
   return (
     <Card wrapperStyle={styles.card}>
       <View style={styles.container}>
         <Card.Title>{props.title}</Card.Title>
+          
         <View>
           <Text style={styles.text}>{props.text}</Text>
         </View>
@@ -14,7 +16,7 @@ const MenuCard = props => {
       <Card.Image
         style={styles.image}
         source={{
-          uri: 'https://awildgeographer.files.wordpress.com/2015/02/john_muir_glacier.jpg',
+          uri: `${clientApiUrl }/serverImage/${props.photo}`,
         }}
       />
     </Card>
