@@ -232,7 +232,7 @@ const SignupScreen2 = ({navigation}) => {
                   value={phoneNumber}
                   onChangeText={text => setPhoneNumber(text)}>
             </TextInput>
-            <TouchableOpacity style={styles.smallbutton} onPress={() => handlePhoneNumberCheck(phoneNumber, setPhoneNumberCheck)}>
+            <TouchableOpacity style={styles.smallbutton} onPress={() => {handlePhoneNumberCheck(phoneNumber, setPhoneNumberCheck); }}>
               <Text style={styles.smallbuttonText}>중복확인</Text>
             </TouchableOpacity>
           </View>

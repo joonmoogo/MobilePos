@@ -1,12 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { connect } from 'react-redux';
+import { getUser } from '../utils/userHandler';
+import { getData } from '../utils/asyncStorageService';
+import { clientApiUrl } from '../config';
 
 const DrawerContent = props => {
-  const [isLogged, setIsLogged] = useState(false);
 
+  useEffect(()=>{
+    getData('hknuToken')
+    .then((token)=>{
+      getUser(token).then((data)=>{
+        setIsLogged(true);
+        setUserData(data);
+      }).catch((error)=>{
+        console.log(error);
+      })
+    }).catch((error)=>{
+      console.log(error);
+    })
+  },[])
+  const [isLogged, setIsLogged] = useState(false);
+  const [userData,setUserData]=useState();
   const handleLoginPress = () => {
     setIsLogged(true);
     props.navigation.navigate('LoginScreen');
@@ -55,9 +72,9 @@ const DrawerContent = props => {
               <View style={{flexDirection: 'row'}}>
                 <Image
                   style={styles.profileImage}
-                  source={{ uri: 'https://awildgeographer.files.wordpress.com/2015/02/john_muir_glacier.jpg' }}
+                  source={{ uri: `${clientApiUrl}/serverImage/${userData?.profilePhoto}` }}
                 />
-                <Text style={styles.profileText}>kwn01081</Text>
+                <Text style={styles.profileText}>{userData?.nickname}</Text>
               </View>
             </View>
           ) : (

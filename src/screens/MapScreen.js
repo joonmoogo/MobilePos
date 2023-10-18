@@ -7,7 +7,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Geolocation from '@react-native-community/geolocation';
 import * as geolib from 'geolib';
 import goodRestaurantsData from '../assets/goodrestaurants.json';
-import { getData, storeData } from '../utils/asyncStorageService';
+import { getData, removeData, storeData } from '../utils/asyncStorageService';
 import { getStoreByCoordinate } from '../utils/storeHandler';
 import { Image} from '@rneui/themed';
 import { getOrderByStoreId } from '../utils/orderHandler';

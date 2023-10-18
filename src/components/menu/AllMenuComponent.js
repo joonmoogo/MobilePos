@@ -8,25 +8,32 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { Image, Tab, TabView, Card } from '@rneui/themed';
 import { apiUrl, clientApiUrl } from '../../config';
 import { subscribe } from '../../utils/notificationHandler';
-import { EventSourcePolyfill,EventSource } from 'event-source-polyfill';
-const AllMenuComponent = ({ navigation }) => {
+import { EventSourcePolyfill, EventSource } from 'event-source-polyfill';
+import { useIsFocused } from '@react-navigation/native';
+import Geolocation from '@react-native-community/geolocation';
+const AllMenuComponent = ({ navigation, distance }) => {
   const [stores, setStores] = useState([]);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    getData('stores').then((data) => {
-      setStores(data);
-      console.log(data);
-    });
-    // getData('hknuToken').then((token)=>{
-    //   const EventSource = EventSourcePolyfill;
-    //   const source = new EventSource(`${apiUrl}/notifications/subscribe`,{headers:{'access_token':token},heartbeatTimeout:86400000})
-    //     source.addEventListener('SERVER_CONNECT',(e)=>{
-    //         console.log(e);
-    //     })
-    //   })
-    
-    
-  }, []);
+    if (isFocused) {
+      getData('hknuToken').then((token)=>{
+        Geolocation.getCurrentPosition((data)=>{
+          console.log(data);
+          const latitude = (data.coords.latitude);
+          const longitude = (data.coords.longitude);
+          getStoreByCoordinate(longitude,latitude,distance,token).then((data)=>{
+            setStores(data);
+          })
+        });
+      })
+      // getData('stores').then((data) => {
+      //   setStores(data);
+      //   console.log(data);
+      // });
+
+    }
+  }, [isFocused, distance]);
 
   return (
     <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -44,7 +51,7 @@ const AllMenuComponent = ({ navigation }) => {
             >
               <Card>
                 <Image
-                  style={{ borderRadius: 10, marginLeft: 20, height: 120, width: 250 }}
+                  style={{ borderRaus: 10, marginLeft: 20, height: 120, width: 250 }}
                   source={{ uri: `${clientApiUrl}/serverImage/${e?.profilePhoto}` }}
                 ></Image>
                 <Text style={{ marginLeft: 20, fontWeight: 'bold', fontSize: 20, color: 'black' }}>{e.name}</Text>

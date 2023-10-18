@@ -29,7 +29,7 @@ const StoreReservationScreen = ({navigation}) => {
                 }} style={styles.profileImage}></Image>
                 <Text style={{alignSelf:'center', fontSize:25}}>{store?.name }</Text>
             </View>
-            <ReservationDetail />
+            <ReservationDetail naviation={navigation} />
             
         </View>
     )

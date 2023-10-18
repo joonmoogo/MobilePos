@@ -12,8 +12,14 @@ import WesternMenuComponent from '../components/menu/WesternMenuComponent';
 import AsianMenuComponent from '../components/menu/AsianMenuComponent';
 import SnackMenuComponent from '../components/menu/SnackMenuComponent';
 import OneMenuComponent from '../components/menu/OneMenuComponent';
+import { useEffect } from 'react';
+import Geolocation from '@react-native-community/geolocation';
+import { useIsFocused } from '@react-navigation/native';
+import ScrollPicker from 'react-native-wheel-scrollview-picker';
+
 
 const ListScreen = ({ navigation }) => {
+
   // 메뉴 섹션 선택, 기본='전체'
   const [selectedMenu, setSelectedMenu] = useState('all');
   const handleMenuPress = (menu) => {
@@ -30,13 +36,21 @@ const ListScreen = ({ navigation }) => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('distance');
   const [items, setItems] = useState([
-    {label: '거리 순', value: 'distance'},
-    {label: '별점 순', value: 'star'},
-    {label: '리뷰 많은 순', value: 'review'},
+    { label: '거리 순', value: 'distance' },
+    { label: '별점 순', value: 'star' },
+    { label: '리뷰 많은 순', value: 'review' },
   ]);
+  const [distance, setDistance] = useState(1000);
 
+  function formatNumberWithCommas(number) {
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+  function removeCommasFromString(str) {
+    return str.replace(/,/g, '');
+  }
   // 찜한 가게 체크, 기능 구현 필요함
   const [isChecked, setChecked] = useState(false);
+  const [handlePicker,setHandlerPicker] = useState(false);
 
   return (
     <View style={styles.container}>
@@ -51,90 +65,99 @@ const ListScreen = ({ navigation }) => {
 
       <View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <TouchableOpacity
-          style={selectedMenu === 'all' ? styles.selectedMenu : styles.menu}
-          onPress={() => handleMenuPress('all')}>
-          <Text style={selectedMenu === 'all' ? styles.selectedMenuText : styles.menuText}>전체</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={selectedMenu === 'korean' ? styles.selectedMenu : styles.menu}
-          onPress={() => handleMenuPress('korean')}>
-          <Text style={selectedMenu === 'korean' ? styles.selectedMenuText : styles.menuText}>한식</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={selectedMenu === 'chinese' ? styles.selectedMenu : styles.menu}
-          onPress={() => handleMenuPress('chinese')}>
-          <Text style={selectedMenu === 'chinese' ? styles.selectedMenuText : styles.menuText}>중식</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={selectedMenu === 'japanese' ? styles.selectedMenu : styles.menu}
-          onPress={() => handleMenuPress('japanese')}>
-          <Text style={selectedMenu === 'japanese' ? styles.selectedMenuText : styles.menuText}>일식 돈가스</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={selectedMenu === 'western' ? styles.selectedMenu : styles.menu}
-          onPress={() => handleMenuPress('western')}>
-          <Text style={selectedMenu === 'western' ? styles.selectedMenuText : styles.menuText}>양식</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={selectedMenu === 'asian' ? styles.selectedMenu : styles.menu}
-          onPress={() => handleMenuPress('asian')}>
-          <Text style={selectedMenu === 'asian' ? styles.selectedMenuText : styles.menuText}>동남아</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={selectedMenu === 'snack' ? styles.selectedMenu : styles.menu}
-          onPress={() => handleMenuPress('snack')}>
-          <Text style={selectedMenu === 'snack' ? styles.selectedMenuText : styles.menuText}>분식</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={selectedMenu === 'one' ? styles.selectedMenu : styles.menu}
-          onPress={() => handleMenuPress('one')}>
-          <Text style={selectedMenu === 'one' ? styles.selectedMenuText : styles.menuText}>혼밥</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={selectedMenu === 'all' ? styles.selectedMenu : styles.menu}
+            onPress={() => handleMenuPress('all')}>
+            <Text style={selectedMenu === 'all' ? styles.selectedMenuText : styles.menuText}>전체</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={selectedMenu === 'korean' ? styles.selectedMenu : styles.menu}
+            onPress={() => handleMenuPress('korean')}>
+            <Text style={selectedMenu === 'korean' ? styles.selectedMenuText : styles.menuText}>한식</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={selectedMenu === 'chinese' ? styles.selectedMenu : styles.menu}
+            onPress={() => handleMenuPress('chinese')}>
+            <Text style={selectedMenu === 'chinese' ? styles.selectedMenuText : styles.menuText}>중식</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={selectedMenu === 'japanese' ? styles.selectedMenu : styles.menu}
+            onPress={() => handleMenuPress('japanese')}>
+            <Text style={selectedMenu === 'japanese' ? styles.selectedMenuText : styles.menuText}>일식</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={selectedMenu === 'western' ? styles.selectedMenu : styles.menu}
+            onPress={() => handleMenuPress('western')}>
+            <Text style={selectedMenu === 'western' ? styles.selectedMenuText : styles.menuText}>양식</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={selectedMenu === 'snack' ? styles.selectedMenu : styles.menu}
+            onPress={() => handleMenuPress('snack')}>
+            <Text style={selectedMenu === 'snack' ? styles.selectedMenuText : styles.menuText}>분식</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={selectedMenu === 'one' ? styles.selectedMenu : styles.menu}
+            onPress={() => handleMenuPress('one')}>
+            <Text style={selectedMenu === 'one' ? styles.selectedMenuText : styles.menuText}>찜한 가게</Text>
+          </TouchableOpacity>
         </ScrollView>
       </View>
 
-      <View style={{flexDirection: 'row', margin:15}}>
+      <View style={{ flexDirection: 'row', margin: 15 }}>
         <TouchableOpacity onPress={handleIconPress}>
-          <Icon style={{ color: 'grey'}} name="room" size={25} />
+          <Icon style={{ color: 'grey' }} name="room" size={25} />
         </TouchableOpacity>
         {isLoadingLocation ? (
-            <Text style={{ color: 'grey', fontSize: 20 }}>위치 검색 중입니다...</Text>
-          ) : (
-            <Text style={{ color: 'grey', fontSize: 20 }}>{currentAddress}</Text>
-          )}
+          <Text style={{ color: 'grey', fontSize: 20 }}>위치 검색 중입니다...</Text>
+        ) : (
+          <Text style={{ color: 'grey', fontSize: 20 }}>{currentAddress}</Text>
+        )}
+      </View>
+
+      <View style={{ flexDirection: 'row' }}>
+        <View style={styles.dropdownFrame}>
+          <DropDownPicker
+            style={styles.dropdown}
+            open={open}
+            value={value}
+            items={items}
+            setOpen={setOpen}
+            setValue={setValue}
+            setItems={setItems}
+          />
         </View>
 
-        <View style={{flexDirection: 'row'}}>
-          <View style={styles.dropdownFrame}>
-            <DropDownPicker
-              style={styles.dropdown}
-              open={open}
-              value={value}
-              items={items}
-              setOpen={setOpen}
-              setValue={setValue}
-              setItems={setItems}
-            />
-          </View>
+        <View style={styles.checkboxFrame}>
+          <Text style={{ flexDirection: 'row' }}>
+            <View style={{ marginBottom: 20 }}>
 
-          <View style={styles.checkboxFrame}>
-            <Text style={{flexDirection: 'row'}}>
-              <CheckBox value={isChecked} onValueChange={setChecked} />
-              <Text style={{color: 'grey'}}>  찜한 가게만 보기</Text>
-            </Text>
-          </View>
+            </View>
+            <TouchableOpacity onPress={() => {
+              setHandlerPicker(!handlePicker);
+            }}>
+              <Text style={{ color: 'grey' }}>{`${formatNumberWithCommas(distance)}m 거리 보기`}</Text>
+            </TouchableOpacity>
+          </Text>
         </View>
+
+        {handlePicker?<View style={{ ...styles.infoContainer, flexDirection: 'row', marginBottom: 10 }}>
+        <ScrollPicker
+                  dataSource={['1,000', '2,000', '3,000', '4,000', '5,000', '6,000','7,000']}
+                  onValueChange={(data)=>{setDistance(removeCommasFromString(data))}}
+                  wrapperColor='#FFFFFF'
+                />
+                </View>:null}
+      </View>
 
       <View>
-        {selectedMenu === 'all' && (<AllMenuComponent navigation={navigation} />)}
+        {selectedMenu === 'all' && (<AllMenuComponent navigation={navigation} distance={distance} />)}
         {selectedMenu === 'korean' && (<KoreanMenuComponent navigation={navigation} />)}
         {selectedMenu === 'chinese' && (<ChineseMenuComponent navigation={navigation} />)}
+        {selectedMenu === 'one' && (<OneMenuComponent navigation={navigation} />)}
         {selectedMenu === 'japanese' && (<JapaneseMenuComponent navigation={navigation} />)}
         {selectedMenu === 'western' && (<WesternMenuComponent navigation={navigation} />)}
         {selectedMenu === 'asian' && (<AsianMenuComponent navigation={navigation} />)}
         {selectedMenu === 'snack' && (<SnackMenuComponent navigation={navigation} />)}
-        {selectedMenu === 'one' && (<OneMenuComponent navigation={navigation} />)}
       </View>
 
     </View>
@@ -142,6 +165,20 @@ const ListScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  infoContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    top: 280,
+    height: 250,
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 30,
+    borderWidth: 1, // 테두리 두께
+    borderColor: 'lightgrey', // 테두리 색상
+    zIndex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -152,7 +189,7 @@ const styles = StyleSheet.create({
   },
   inputcontainer: {
     backgroundColor: 'deepskyblue',
-    width: Dimensions.get('window').width, 
+    width: Dimensions.get('window').width,
     height: 60,
     justifyContent: 'center',
     alignItems: 'center',

@@ -69,6 +69,7 @@
 
   // 휴대폰 번호 중복 확인
   export const handlePhoneNumberCheck = async (phoneNumber, setPhoneNumberCheck) => {
+    console.log(phoneNumber);
     if (phoneNumber.trim() === '') {
       setPhoneNumberCheck('휴대폰 번호를 입력해주세요.');
       return;
@@ -81,12 +82,11 @@
       const response = await fetch(`${apiUrl}/check/phone-number`, {
         method: 'POST',
         body: formData,
-      }).then((data)=>{
-        console.log(data);
-      })
+      });
+      console.log('im response');
+      console.log(response);
   
       if (response.ok) {
-        console.log(response);
         const result = await response.json();
   
         if (result === true) {
@@ -95,10 +95,11 @@
           setPhoneNumberCheck('사용 가능한 휴대폰 번호입니다.');
         }
       } else {
-        setPhoneNumberCheck('중복 확인 중 오류가 발생했습니다.');
+        setPhoneNumberCheck('중복 확인 중 오류가 발생했s습니다.');
       }
     } catch (error) {
-      setPhoneNumberCheck('중복 확인 중 오류가 발생했습니다.');
+      console.error(error);
+      setPhoneNumberCheck('중복 확인 중 오류가 발생했d습니다.');
     }
   };
 

@@ -14,8 +14,8 @@ import { getOrder, getOrderByStoreId, saveReservation } from '../utils/orderHand
 import { saveOrderDetail } from '../utils/orderDetailHandler';
 
 
+
 const ReservationDetail = () => {
-  
   
   useEffect(()=>{
     getData('hknuToken').then((token)=>{

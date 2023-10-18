@@ -6,7 +6,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { WebView } from 'react-native-webview';
 import MenuCard from '../components/card/MenuCard';
 import ReviewCard from '../components/card/ReviewCard';
-import { getData } from '../utils/asyncStorageService';
+import { getData, storeData } from '../utils/asyncStorageService';
 import { getMenus } from '../utils/menuHandler';
 import { getStoreById } from '../utils/storeHandler';
 import { getTableById } from '../utils/tableHandler';
@@ -37,6 +37,12 @@ const DetailScreen = ({ navigation }) => {
             console.log(storeData);
             console.log(menus);
             console.log(tables);
+            getData('zzim').then((data)=>{
+              const found = data.find(item => item.name === storeData.name);
+              if(found) {
+                setIcon('favorite');
+              }
+            });
             setStore(storeData);
             setMenus(menus);
             setTables(tables);
@@ -66,6 +72,7 @@ const DetailScreen = ({ navigation }) => {
         
     };
 
+
     fetchData()
     .catch((error)=>{
       return error;
@@ -75,7 +82,33 @@ const DetailScreen = ({ navigation }) => {
   const [store,setStore] = useState();
   const [menus, setMenus] = useState([]);
   const [tables,setTables] = useState([]);
+  const [icon,setIcon] = useState('favorite-border')
 
+  function heartFill(){
+    setIcon('favorite');
+    getData('zzim').then((data)=>{
+      if(data){
+        const found = data.find(item => item.name === store.name);
+        if(found){
+          return;
+        }
+        data.push(store);
+        storeData('zzim',data);
+      }
+      else{
+        storeData('zzim',[store]);
+      }
+      
+    })
+  }
+  function heartEmpty(){
+    setIcon('favorite-border');
+    getData('zzim').then((data)=>{
+      const found = data.filter(item => item.name !== store.name);
+      storeData('zzim',found);
+
+    })
+  }
 
   
   const reviews = [
@@ -86,7 +119,7 @@ const DetailScreen = ({ navigation }) => {
     },
     {
       title: '구르니',
-      text: '너무 맛있다',
+      text: '너무 맛있네',
       rating: 4,
     },
   ];
@@ -162,8 +195,8 @@ const DetailScreen = ({ navigation }) => {
             <Text style={{color:'white', padding: 10, textAlign:'center'}}>예약 하기</Text>
             </TouchableOpacity>
             <TouchableOpacity>
-            <MaterialIcons color="red"  name="favorite-border" size={35} style={{left:130, bottom:35}} onPress={()=>{
-              console.log('heart button was clicked');
+            <MaterialIcons color="red"  name={icon} size={35} style={{left:130, bottom:35,}} onPress={()=>{
+              icon=='favorite'?heartEmpty():heartFill();
             }}/>
             </TouchableOpacity>
           
