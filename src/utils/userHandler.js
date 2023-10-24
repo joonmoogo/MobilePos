@@ -28,6 +28,34 @@ export const getUser = async (token) => {
       throw error;
     }
   };
+  export const getUserById = async (userId,token) => {
+  
+    const url = `${apiUrl}/users/${userId}`;
+    const headers = {
+      'access_token': token,
+    };
+  
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: headers,
+      });
+      if (!response.ok) {
+        if(response.status=='401'){
+          throw new Error('로그인 필요합니다');
+        }
+        else{
+          throw new Error(response.status);
+        }
+      }
+      const data = await response.json();
+      return data;
+      
+    } catch (error) {
+      console.error( error);
+      throw error;
+    }
+  };
 
   export const editUser = async (info,token) => {
       

@@ -234,7 +234,7 @@ const ReservationDetail = () => {
             console.log(data);
             selectedMenu.forEach((e)=>{
               const menuInfo = {
-                orderId : data[0].id,
+                orderId : data[data.length-1].id,
                 menuId : e.id,
                 amount : e.count
               }

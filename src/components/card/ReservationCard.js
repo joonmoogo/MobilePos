@@ -40,6 +40,7 @@ const ReservationCard = props => {
     fetchStoreName();
   }, []);
   return (
+    <>
     <Card wrapperStyle={styles.card}>
       <View style={styles.profile}>
         <View style={{flexDirection: 'row'}}>
@@ -57,8 +58,9 @@ const ReservationCard = props => {
       <View style={styles.container}>
         <Text style={styles.text}>{convertToStandardTime(props.time)}</Text>
       </View>
-
+      
     </Card>
+    </>
   );
 };
 

@@ -9,6 +9,7 @@ import StoreReservationScreen from '../screens/StoreReservationScreen';
 import { LoginScreen, FindIDScreen, FindPasswordScreen } from '../screens/LoginScreen';
 import { SignupScreen1, SignupScreen2, SignupScreen3 } from '../screens/SignupScreen';
 import SearchScreen from '../screens/SearchScreen';
+import ReviewForm from '../screens/ReviewFormScreen';
 
 const Stack = createStackNavigator();
 
@@ -35,6 +36,7 @@ const ReservationStack = () => {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}} >
       <Stack.Screen name="stackReservation" component={ReservationScreen} />
+      <Stack.Screen name="stackReservationReview" component={ReviewForm} />
     </Stack.Navigator>
   );
 };

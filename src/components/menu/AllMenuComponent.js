@@ -11,35 +11,16 @@ import { subscribe } from '../../utils/notificationHandler';
 import { EventSourcePolyfill, EventSource } from 'event-source-polyfill';
 import { useIsFocused } from '@react-navigation/native';
 import Geolocation from '@react-native-community/geolocation';
-const AllMenuComponent = ({ navigation, distance }) => {
+const AllMenuComponent = ({ navigation, distance, store }) => {
   const [stores, setStores] = useState([]);
   const isFocused = useIsFocused();
 
-  useEffect(() => {
-    if (isFocused) {
-      getData('hknuToken').then((token)=>{
-        Geolocation.getCurrentPosition((data)=>{
-          console.log(data);
-          const latitude = (data.coords.latitude);
-          const longitude = (data.coords.longitude);
-          getStoreByCoordinate(longitude,latitude,distance,token).then((data)=>{
-            setStores(data);
-          })
-        });
-      })
-      // getData('stores').then((data) => {
-      //   setStores(data);
-      //   console.log(data);
-      // });
-
-    }
-  }, [isFocused, distance]);
-
   return (
-    <ScrollView contentContainerStyle={styles.scrollViewContent}>
-      {stores.map((e, i) => {
+    <View style={{ flexDirection: 'row' }}>
+    <ScrollView contentContainerStyle={styles.scrollViewContent} >
+      {store?.map((e, i) => {
         return (
-          <View key={e.id}>
+          <View key={i}>
             <TouchableOpacity
               onPress={() => {
                 console.log(e.id);
@@ -51,7 +32,7 @@ const AllMenuComponent = ({ navigation, distance }) => {
             >
               <Card>
                 <Image
-                  style={{ borderRaus: 10, marginLeft: 20, height: 120, width: 250 }}
+                  style={{ borderRadius: 10, marginLeft: 20, height: 120, width: 250 }}
                   source={{ uri: `${clientApiUrl}/serverImage/${e?.profilePhoto}` }}
                 ></Image>
                 <Text style={{ marginLeft: 20, fontWeight: 'bold', fontSize: 20, color: 'black' }}>{e.name}</Text>
@@ -62,6 +43,7 @@ const AllMenuComponent = ({ navigation, distance }) => {
         );
       })}
     </ScrollView>
+    </View>
   );
 };
 

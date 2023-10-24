@@ -16,9 +16,47 @@ import { useEffect } from 'react';
 import Geolocation from '@react-native-community/geolocation';
 import { useIsFocused } from '@react-navigation/native';
 import ScrollPicker from 'react-native-wheel-scrollview-picker';
+import { getData } from '../utils/asyncStorageService';
+import { getStoreByCoordinate } from '../utils/storeHandler';
 
 
 const ListScreen = ({ navigation }) => {
+  const isFocused = useIsFocused();
+  const [stores, setStores] = useState();
+  const [koreans, setKoreans] = useState();
+  const [chineses, setChineses] = useState();
+  const [japaneses, setJapaneses] = useState();
+  const [westerns, setWesterns] = useState();
+  const [distance, setDistance] = useState(10000);
+
+  useEffect(() => {
+    if (isFocused) {
+  
+      getData('hknuToken').then((token) => {
+        Geolocation.getCurrentPosition((data) => {
+          console.log(data);
+          const latitude = (data.coords.latitude);
+          const longitude = (data.coords.longitude);
+          getStoreByCoordinate(longitude, latitude, distance, token).then((storeData) => {
+            setStores(storeData);
+            const koreanStores = storeData.filter((store) => store.storeCategory === 'KOREAN');
+            setKoreans(koreanStores);
+            const westernStores = storeData.filter((store) => store.storeCategory === 'WESTERN');
+            setWesterns(westernStores);
+            const japaneseStores = storeData.filter((store) => store.storeCategory === 'JAPANESE');
+            setJapaneses(japaneseStores);
+            const chineseStores = storeData.filter((store) => store.storeCategory === 'CHINESE');
+            setChineses(chineseStores);
+          }).catch((error)=>{console.log(error)})
+        });
+      })
+      // getData('stores').then((data) => {
+      //   setStores(data);
+      //   console.log(data);
+      // });
+
+    }
+  }, [isFocused, distance]);
 
   // 메뉴 섹션 선택, 기본='전체'
   const [selectedMenu, setSelectedMenu] = useState('all');
@@ -40,7 +78,6 @@ const ListScreen = ({ navigation }) => {
     { label: '별점 순', value: 'star' },
     { label: '리뷰 많은 순', value: 'review' },
   ]);
-  const [distance, setDistance] = useState(1000);
 
   function formatNumberWithCommas(number) {
     return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -50,7 +87,7 @@ const ListScreen = ({ navigation }) => {
   }
   // 찜한 가게 체크, 기능 구현 필요함
   const [isChecked, setChecked] = useState(false);
-  const [handlePicker,setHandlerPicker] = useState(false);
+  const [handlePicker, setHandlerPicker] = useState(false);
 
   return (
     <View style={styles.container}>
@@ -89,11 +126,6 @@ const ListScreen = ({ navigation }) => {
             style={selectedMenu === 'western' ? styles.selectedMenu : styles.menu}
             onPress={() => handleMenuPress('western')}>
             <Text style={selectedMenu === 'western' ? styles.selectedMenuText : styles.menuText}>양식</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={selectedMenu === 'snack' ? styles.selectedMenu : styles.menu}
-            onPress={() => handleMenuPress('snack')}>
-            <Text style={selectedMenu === 'snack' ? styles.selectedMenuText : styles.menuText}>분식</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={selectedMenu === 'one' ? styles.selectedMenu : styles.menu}
@@ -140,24 +172,23 @@ const ListScreen = ({ navigation }) => {
           </Text>
         </View>
 
-        {handlePicker?<View style={{ ...styles.infoContainer, flexDirection: 'row', marginBottom: 10 }}>
-        <ScrollPicker
-                  dataSource={['1,000', '2,000', '3,000', '4,000', '5,000', '6,000','7,000']}
-                  onValueChange={(data)=>{setDistance(removeCommasFromString(data))}}
-                  wrapperColor='#FFFFFF'
-                />
-                </View>:null}
+        {handlePicker ? <View style={{ ...styles.infoContainer, flexDirection: 'row', marginBottom: 10 }}>
+          <ScrollPicker
+            dataSource={['1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000','8,000','9,000','10,000']}
+            onValueChange={(data) => { setDistance(removeCommasFromString(data)) }}
+            wrapperColor='#FFFFFF'
+          />
+        </View> : null}
       </View>
 
       <View>
-        {selectedMenu === 'all' && (<AllMenuComponent navigation={navigation} distance={distance} />)}
-        {selectedMenu === 'korean' && (<KoreanMenuComponent navigation={navigation} />)}
-        {selectedMenu === 'chinese' && (<ChineseMenuComponent navigation={navigation} />)}
-        {selectedMenu === 'one' && (<OneMenuComponent navigation={navigation} />)}
-        {selectedMenu === 'japanese' && (<JapaneseMenuComponent navigation={navigation} />)}
-        {selectedMenu === 'western' && (<WesternMenuComponent navigation={navigation} />)}
-        {selectedMenu === 'asian' && (<AsianMenuComponent navigation={navigation} />)}
-        {selectedMenu === 'snack' && (<SnackMenuComponent navigation={navigation} />)}
+        {selectedMenu === 'all' && (<AllMenuComponent navigation={navigation} store={stores} distance={distance} />)}
+        {selectedMenu === 'korean' && (<KoreanMenuComponent navigation={navigation} store={koreans} />)}
+        {selectedMenu === 'chinese' && (<ChineseMenuComponent navigation={navigation} store={chineses} />)}
+        {selectedMenu === 'japanese' && (<JapaneseMenuComponent navigation={navigation} store={japaneses} />)}
+        {selectedMenu === 'western' && (<WesternMenuComponent navigation={navigation} store={westerns} />)}
+        {selectedMenu === 'one' && (<OneMenuComponent navigation={navigation}  />)}
+
       </View>
 
     </View>

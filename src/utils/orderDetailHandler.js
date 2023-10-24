@@ -2,7 +2,7 @@ import { apiUrl } from "../config";
 
 export const saveOrderDetail = async (orderDetail, token) => {
     const formData = new FormData();
-  
+    console.log(orderDetail);
     formData.append('orderId', orderDetail.orderId);
     formData.append('menuId', orderDetail.menuId);
     formData.append('amount', orderDetail.amount);

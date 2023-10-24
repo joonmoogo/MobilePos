@@ -14,29 +14,35 @@ import { clientApiUrl } from '../config';
 import { getUser } from '../utils/userHandler';
 import { serverConnect } from '../utils/notificationHandler';
 import { getOrderByStoreId } from '../utils/orderHandler';
+import { useIsFocused } from '@react-navigation/native';
+import { getReviewsByStoreId } from '../utils/reviewHandler';
 
 
 
 const DetailScreen = ({ navigation }) => {
+  const isFocused = useIsFocused();
   useEffect(() => {
     const fetchData = async () => {
         try {
+          
             const storeId = await getData('clickedStore');
             console.log('detailScreen Id = ' + storeId);
 
             const token = await getData('hknuToken');
             console.log(token);
 
-            const [storeData, menus, tables, user] = await Promise.all([
+            const [storeData, menus, tables, user,reviews] = await Promise.all([
                 getStoreById(storeId, token),
                 getMenus(storeId, token),
                 getTableById(storeId, token),
                 getUser(token),
+                getReviewsByStoreId(storeId,token)
             ]);
 
             console.log(storeData);
             console.log(menus);
             console.log(tables);
+            console.log(reviews);
             getData('zzim').then((data)=>{
               const found = data.find(item => item.name === storeData.name);
               if(found) {
@@ -46,6 +52,7 @@ const DetailScreen = ({ navigation }) => {
             setStore(storeData);
             setMenus(menus);
             setTables(tables);
+            setReview(reviews)
 
 
             const orders = await getOrderByStoreId(storeId, token);
@@ -72,13 +79,15 @@ const DetailScreen = ({ navigation }) => {
         
     };
 
+    if(isFocused){
+      fetchData().catch((error)=>{
+        return error;
+      })
+    }
 
-    fetchData()
-    .catch((error)=>{
-      return error;
-    })
+    
 }, []);
-
+  const [review,setReview] = useState([]);
   const [store,setStore] = useState();
   const [menus, setMenus] = useState([]);
   const [tables,setTables] = useState([]);
@@ -111,18 +120,7 @@ const DetailScreen = ({ navigation }) => {
   }
 
   
-  const reviews = [
-    {
-      title: '구름이',
-      text: '너무 맛있었다',
-      rating: 5,
-    },
-    {
-      title: '구르니',
-      text: '너무 맛있네',
-      rating: 4,
-    },
-  ];
+
   const webViewRef = useRef(null);
 
   const [index, setIndex] = React.useState(0);
@@ -137,12 +135,12 @@ const DetailScreen = ({ navigation }) => {
      ></MenuCard>
   ));
 
-  const reviewList = reviews.map(review => (
+  const reviewList = review.map(item => (
     <ReviewCard
-      key={review.title}
-      title={review.title}
-      text={review.text}
-      rating={review.rating}></ReviewCard>
+      key={item.id}
+      title={item.accountId}
+      text={item.detail}
+      rating={item.rating}></ReviewCard>
   ));
 
   const htmlContent = `
@@ -236,21 +234,20 @@ const DetailScreen = ({ navigation }) => {
             <View style={styles.informationItem} >
               {tables.map((e,i)=>{
                 console.log(e);
-                const originalWidth = 770;
+                const originalWidth = 800;
                 const originalHeight = 475;
-                const newWidth = 400;
+                const newWidth = 450;
                 const newHeight = 270;
-
+              
                 const originalTop = parseInt(e.coordY);
                 const originalLeft = parseInt(e.coordX);
-
+              
                 const widthRatio = newWidth / originalWidth;
                 const heightRatio = newHeight / originalHeight;
-
-                // 새로운 환경에서의 top 및 left 계산
-                const newTop = originalTop * heightRatio -40;
-                const newLeft = originalLeft * widthRatio -50;
-                
+              
+                const newTop = originalTop * heightRatio - 40;
+                const newLeft = originalLeft * widthRatio - 70;
+              
                 return(
                   <View
                   key={i} 

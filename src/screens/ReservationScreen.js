@@ -3,8 +3,9 @@ import { StyleSheet, Text, View, Dimensions, ScrollView } from 'react-native';
 import ReservationCard from '../components/card/ReservationCard';
 import ReservationedCard from '../components/card/ReservationedCard';
 import { getData } from '../utils/asyncStorageService';
-import { getReservations } from '../utils/orderHandler';
+import { getOrder, getReservations } from '../utils/orderHandler';
 import { useIsFocused } from '@react-navigation/native';
+import { getReviews } from '../utils/reviewHandler';
 
 const ReservationScreen = () => {
   const [reservations, setReservations] = useState([]);
@@ -15,8 +16,11 @@ const ReservationScreen = () => {
     async function fetchData() {
       const token = await getData('hknuToken');
       const data = await getReservations(token); 
+      const data2 = await getOrder(token);
+      const data3 = await getReviews(token);
       setReservations(data);
-      console.log(data);
+      setReservationeds(data2);
+      console.log(data3);
     }
     if(isFocused){
     fetchData()
@@ -58,8 +62,9 @@ const ReservationScreen = () => {
   const ReservationedList = reservationeds.map((reservation,i) => (
     <ReservationedCard
       key={i}
-      title={reservation.title}
-      time={reservation.time}
+      title={reservation.storeId}
+      // time={reservation.orderCode}
+      orderCode={reservation.orderCode}
       menu={reservation.menu}
     ></ReservationedCard>
   ));
