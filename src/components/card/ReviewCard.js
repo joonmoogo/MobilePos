@@ -32,7 +32,23 @@ const ReviewCard = props => {
   function removeTextInAngleBrackets(text) {
     return text.replace(/<[^>]+>/g, '');
   }
-  
+  function formatDate(inputDate) {
+    const inputDateObj = new Date(inputDate);
+    const currentDate = new Date();
+    
+    const timeDiff = currentDate - inputDateObj;
+    const oneDay = 24 * 60 * 60 * 1000;
+    
+    if (timeDiff < oneDay) {
+      return '오늘';
+    } else if (timeDiff < 2 * oneDay) {
+      return '어제';
+    } else {
+      const month = (inputDateObj.getMonth() + 1).toString().padStart(2, '0');
+      const day = inputDateObj.getDate().toString().padStart(2, '0');
+      return `${month}-${day}`;
+    }
+  }
   return (
     <Card wrapperStyle={styles.card}>
       <View style={styles.profile}>
@@ -43,8 +59,9 @@ const ReviewCard = props => {
           }}
         />
         <View>
-          <Card.Title>{userData?.nickname}</Card.Title>
+        <Card.Title>{userData?.nickname}</Card.Title>
           <Rating imageSize={15} readonly startingValue={props.rating}></Rating>
+
         </View>
       </View>
       <View style={styles.container}>
@@ -54,6 +71,7 @@ const ReviewCard = props => {
         )
           })}
         <Text style={styles.text}>{removeTextInAngleBrackets(props.text)}</Text>
+        <Text style={{fontSize:9, color:'grey'}}>{formatDate(props?.writingTime)}</Text>
       </View>
       
     </Card>

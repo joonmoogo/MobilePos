@@ -12,6 +12,8 @@ import { getStoreByCoordinate } from '../utils/storeHandler';
 import { Image} from '@rneui/themed';
 import { getOrderByStoreId } from '../utils/orderHandler';
 import { useIsFocused } from '@react-navigation/native';
+import { getReviewsByStoreId } from '../utils/reviewHandler';
+import { Rating } from 'react-native-elements';
 
 
 
@@ -26,6 +28,7 @@ const MapScreen = ({ navigation }) => {
   const webViewRef = useRef(null);
   const [newgoodRestaurantsData, setNewGoodRestaurantsData] = useState([]); // 초기 상태는 빈 배열
   const [storeStatus,setStoreStatus] = useState();
+  const [totalRating,setTotalRating] = useState();
   const isFocused = useIsFocused();
 
   const handleMarkerClick = (markerData) => {
@@ -34,6 +37,18 @@ const MapScreen = ({ navigation }) => {
       getOrderByStoreId(markerData.id,token).then((data)=>{
         setStoreStatus(data.length);
       })
+      let total = 0;
+      if(markerData?.review.length!==0){
+        markerData.review.map((e,i)=>{
+          total += e.rating;
+        })
+        const average = (total/markerData.review.length);
+        console.log(average);
+        setTotalRating(average);
+      }
+      else{
+        setTotalRating(0);
+      }
       setInfoVisible(true);
       Animated.timing(infoAnimation, {
         toValue: 1,
@@ -51,12 +66,14 @@ const MapScreen = ({ navigation }) => {
     }).start(() => {
       setInfoVisible(false);
       setSelectedMarkerData(null);
+      setTotalRating(0);
     });
   };
 
   useEffect(() => {
     if (selectedMarkerData) {
       console.log("Selected Marker Data:", selectedMarkerData);
+      
     } else {
       console.log("Selected Marker Data: null");
     }
@@ -70,21 +87,41 @@ const MapScreen = ({ navigation }) => {
         console.log('Current Location:', latitude, longitude);
         setLatitude(latitude);
         setLongitude(longitude);
-        getData('hknuToken').then((data) => {
-          setToken(data);
-          console.log(data);
-          getStoreByCoordinate(latitude, longitude, 1000000000000, data).then((data) => {
-            storeData('stores', data);
-            data.map((e, i) => {
-              const store = {
-                BIZEST_NM: e.name,
-                REFINE_WGS84_LAT: e.longitude,
-                REFINE_WGS84_LOGT: e.latitude,
-                photo : e.profilePhoto,
-                id:e.id,
-              }
+        getData('hknuToken').then((token) => {
+          setToken(token);
+          console.log(token);
+          getStoreByCoordinate(latitude, longitude, 1000000000000, token).then((storeInfo) => {
+            
+            storeData('stores', storeInfo);
+            
+            storeInfo.map((e, i) => {
+              getReviewsByStoreId(e.id,token).then((reviews)=>{
+                let store;
+                if(reviews){
+                  store = {
+                    BIZEST_NM: e.name,
+                    REFINE_WGS84_LAT: e.longitude,
+                    REFINE_WGS84_LOGT: e.latitude,
+                    photo : e.profilePhoto,
+                    id:e.id,
+                    review: reviews 
+                  };
+                }
+                else{
+                  store = {
+                    BIZEST_NM: e.name,
+                    REFINE_WGS84_LAT: e.longitude,
+                    REFINE_WGS84_LOGT: e.latitude,
+                    photo : e.profilePhoto,
+                    id:e.id,
+                    review: [] 
+                  };
+                }
+                
+                              
               console.log(store);
               setNewGoodRestaurantsData((prevData) => [...prevData, store]);
+              })
             });
           }).catch((error)=>{return error})
         });
@@ -230,8 +267,8 @@ const MapScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.inputcontainer}>
-        <TextInput style={styles.input} placeholder='Search' onChange={() => {
-
+        <TextInput style={styles.input} placeholder='Search' onChange={(event) => {
+          console.log(event.target);
         }}></TextInput>
       </View>
 
@@ -261,25 +298,19 @@ const MapScreen = ({ navigation }) => {
             <View>
             <TouchableOpacity onPress={()=>{
                   storeData('clickedStore', selectedMarkerData.id).then(() => {
+                    console.log(selectedMarkerData.id);
                   navigation.navigate('stackDetail');
                 });}}>
               <Image style={{height:90,width:'100%',}} source={{ uri: `${clientApiUrl}/serverImage/${selectedMarkerData.photo}` }}></Image>
               <View style={{ alignItems: "center"}}>
                 <Text  style={{fontSize: 25,color:'black',fontWeight:'bold' }} numberOfLines={1} ellipsizeMode="tail">{selectedMarkerData.BIZEST_NM}</Text>
                   <View style={{flexDirection: "row", alignItems: "center"}}>
-                    <Text style={{fontSize: 15}}>5</Text>
+                    <Text style={{fontSize: 15}}>{totalRating}</Text>
                     <View style={{flexDirection: 'row'}}>
-                      {[1, 2, 3, 4, 5].map((idx) => (
-                        <FontAwesome
-                          key={idx}
-                          name="star"
-                          size={15}
-                          color='gold'
-                          style={{ marginLeft: 5 }}
-                        />
-                      ))}
+                    <Rating  readonly imageSize={20} startingValue={totalRating}/>
                     </View>
                   </View>
+                  
               </View>
               </TouchableOpacity>
               <View style={{flexDirection: "row",  alignItems: "center", alignSelf: "center"}}>
@@ -293,9 +324,9 @@ const MapScreen = ({ navigation }) => {
                 </View>
                 <View style={{alignItems: "center", marginRight:10}}>
                   <MaterialIcons color='gold' name="sentiment-satisfied-alt" size={30}></MaterialIcons>
-                  <Text>요즘 맛집 </Text>
+                  <Text>{totalRating>0?totalRating>4?"요즘인기":"성장 중":"신규개업"} </Text>
                 </View>
-                
+
                 <View style={{alignItems: "center", marginRight:10}}>
                   <MaterialIcons color={storeStatus&&storeStatus>10?"orange":"green"} name="people" size={30}></MaterialIcons>
                   <Text>{storeStatus&&storeStatus>10?"주문 많음":"한적함"}</Text>

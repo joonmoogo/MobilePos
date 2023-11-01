@@ -50,10 +50,6 @@ const ListScreen = ({ navigation }) => {
           }).catch((error)=>{console.log(error)})
         });
       })
-      // getData('stores').then((data) => {
-      //   setStores(data);
-      //   console.log(data);
-      // });
 
     }
   }, [isFocused, distance]);
@@ -64,6 +60,7 @@ const ListScreen = ({ navigation }) => {
     setSelectedMenu(menu);
   };
 
+  const customDistance = ['1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000','8,000','9,000','10,000']
   // 현재 위치 찾기, 아이콘 눌러 리프레시
   const { currentLocation, currentAddress, isLoadingLocation, getCurrentLocation } = useLocation();
   const handleIconPress = () => {
@@ -174,7 +171,7 @@ const ListScreen = ({ navigation }) => {
 
         {handlePicker ? <View style={{ ...styles.infoContainer, flexDirection: 'row', marginBottom: 10 }}>
           <ScrollPicker
-            dataSource={['1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000','8,000','9,000','10,000']}
+            dataSource={customDistance}
             onValueChange={(data) => { setDistance(removeCommasFromString(data)) }}
             wrapperColor='#FFFFFF'
           />

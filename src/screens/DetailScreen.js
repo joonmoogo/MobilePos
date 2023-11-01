@@ -86,7 +86,7 @@ const DetailScreen = ({ navigation }) => {
     }
 
     
-}, []);
+}, [isFocused]);
   const [review,setReview] = useState([]);
   const [store,setStore] = useState();
   const [menus, setMenus] = useState([]);
@@ -140,6 +140,7 @@ const DetailScreen = ({ navigation }) => {
       key={item.id}
       title={item.accountId}
       text={item.detail}
+      writingTime={item.writingTime}
       rating={item.rating}></ReviewCard>
   ));
 
@@ -231,13 +232,13 @@ const DetailScreen = ({ navigation }) => {
               />
               <Text style={{marginTop:10,textAlign:'center'}}>{store?.info}</Text>
             </View>
-            <View style={styles.informationItem} >
+            <View style={styles.informationTable} >
               {tables.map((e,i)=>{
                 console.log(e);
-                const originalWidth = 800;
-                const originalHeight = 475;
-                const newWidth = 450;
-                const newHeight = 270;
+                const originalWidth = 940;
+                const originalHeight = 737;
+                const newWidth = 390;
+                const newHeight = 260;
               
                 const originalTop = parseInt(e.coordY);
                 const originalLeft = parseInt(e.coordX);
@@ -245,35 +246,31 @@ const DetailScreen = ({ navigation }) => {
                 const widthRatio = newWidth / originalWidth;
                 const heightRatio = newHeight / originalHeight;
               
-                const newTop = originalTop * heightRatio - 40;
-                const newLeft = originalLeft * widthRatio - 70;
+                const newTop = originalTop * heightRatio+5
+                const newLeft = originalLeft * widthRatio+5
               
+                
                 return(
                   <View
                   key={i} 
                   style={{
                     backgroundColor:'white',
-                    transform: [
-                      { scaleX: newWidth / originalWidth }, // 가로 방향(scaleX)에서의 크기 비율
-                      { scaleY: newHeight / originalHeight }  // 세로 방향(scaleY)에서의 크기 비율
-                    ], 
-                    
-                    top:newTop,
+                    top:newTop ,
                     left:newLeft,
                     backgroundColor:e.ordering?"#F8E0E0":"#CEF6D8",
-                    width:parseInt(e.width),
-                    height:parseInt(e.height),
+                    width:parseInt(e.width) * widthRatio-2,
+                    height:parseInt(e.height) * heightRatio,
                     position:'absolute',
                     borderWidth: 1, // 테두리 두께
                     borderBottomWidth:1.5,
                     borderBottomColor:'teal',
-                    borderRadius:10,
+                    borderRadius:5,
                     borderColor: 'lightgrey', // 테두리 색상
                   }}>
                     <>
-                    <Text style={{marginLeft:10,fontSize:20,color:'black'}}>{e.id}T </Text>
-                    <Text style={{marginLeft:10,fontSize:12}}>{e.name}</Text>
-                    {e.ordering?<Text style={{marginLeft:10, color:'red'}}>식사 중</Text>:<Text style={{marginLeft:10, color:'green'}}></Text>}
+                    <Text style={{marginLeft:5,fontSize:10,color:'black'}}>{e.privateKey}T </Text>
+                    <Text style={{marginLeft:5,fontSize:7}}>{e.name}</Text>
+                    {e.ordering?<Text style={{marginLeft:5, color:'red', fontSize:7}}>식사 중</Text>:<Text style={{marginLeft:10, color:'green'}}></Text>}
                     </>
                   </View>
                 )
@@ -328,7 +325,17 @@ const styles = StyleSheet.create({
     height: 200,
     margin: 20,
     marginLeft: 30,
-    borderRadius:20
+    borderRadius:20,
+  },
+  informationTable: {
+    borderBottomWidth:0.4,
+    borderColor:'grey',
+    backgroundColor: 'white',
+    width: '85%',
+    height: 220,
+    margin: 20,
+    marginLeft: 30,
+    borderRadius:20,
   }
 });
 

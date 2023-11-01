@@ -12,6 +12,7 @@ import { getMenus } from '../utils/menuHandler';
 import { getTableById } from '../utils/tableHandler';
 import { getOrder, getOrderByStoreId, saveReservation } from '../utils/orderHandler';
 import { saveOrderDetail } from '../utils/orderDetailHandler';
+import { useNavigation } from '@react-navigation/native';
 
 
 
@@ -32,19 +33,14 @@ const ReservationDetail = () => {
           console.log(data);
         })
         getTableById(storeId,token).then((data)=>{
-          console.log(data);
-          const tables =[]
-          data.map((e,i)=>{
-            tables.push((e.id));
-          })
-          
-          setTables(tables);
-          console.log(tables);
+
+          setTables(data);
 
         })
       })  
     })
   },[])
+  const navigation = useNavigation();
   const [token,setToken] = useState();
   const [storeId,setStoreId] = useState();
   const [tables,setTables] = useState();
@@ -54,6 +50,9 @@ const ReservationDetail = () => {
   const [table,setTable] = useState(1);
   const [menus, setMenus] = useState([]);
   const [isSelected, setSelected] = useState("");
+  const [selectedTableIndex, setSelectedTableIndex] = useState(null);
+  const [selectedTableNumber,setSelectedTableNumber] = useState(null);
+
     const data = [
         {key: '1', value:'등록된 카드 1'},
     ]
@@ -121,7 +120,7 @@ const ReservationDetail = () => {
 
       {selectedOption === 'time' && (
         <View style={{alignItems: "center", marginBottom: 20}}>
-          <DatePicker date={date} onDateChange={setDate} minimumDate={minimumDateTime} minuteInterval={10} />
+          <DatePicker  date={date} onDateChange={setDate} minimumDate={minimumDateTime} minuteInterval={10} />
         </View>
       )}
 
@@ -146,18 +145,65 @@ const ReservationDetail = () => {
       <TouchableOpacity onPress={() => handleOptionClick('table')}>
         <Text style={styles.titleButton}>   테이블 선택</Text>
       </TouchableOpacity>
-      <Text style={{alignSelf: "center"}}>{table}번</Text>
+      <Text style={{alignSelf: "center"}}>{selectedTableNumber}</Text>
       </View>
 
       {selectedOption === 'table' && (
-        <View style={{marginBottom: 20}}>
-          <ScrollPicker
-            dataSource={tables}
-            selectedIndex={table-1}
-            onValueChange={setTable}
-            wrapperColor='#FFFFFF'
-          />
-        </View>
+        <View style={styles.informationTable} >
+        {tables.map((e,i)=>{
+          console.log(e);
+          const originalWidth = 940;
+          const originalHeight = 737;
+          const newWidth = 390;
+          const newHeight = 260;
+
+          const originalTop = parseInt(e.coordY);
+          const originalLeft = parseInt(e.coordX);
+        
+          const widthRatio = newWidth / originalWidth;
+          const heightRatio = newHeight / originalHeight;
+        
+          const newTop = originalTop * heightRatio+5
+          const newLeft = originalLeft * widthRatio+5
+        
+          
+          return(
+            <>
+            
+            <View
+            key={i} 
+            style={{
+              backgroundColor:'white',
+              top:newTop ,
+              left:newLeft,
+              backgroundColor: selectedTableIndex === i ? 'lightblue' : 'white',
+              width:parseInt(e.width) * widthRatio-2,
+              height:parseInt(e.height) * heightRatio,
+              position:'absolute',
+              borderWidth: 1, // 테두리 두께
+              borderBottomWidth:1.5,
+              borderBottomColor:'teal',
+              borderRadius:5,
+              borderColor: 'lightgrey', // 테두리 색상
+            }}>
+              <TouchableOpacity key={e.id} onPress={()=>{
+              setSelectedTableNumber(`${e.privateKey}T, ${e.name}`);
+              setTable(e.id);
+              setSelectedTableIndex(i); // 선택한 요소의 인덱스를 업데이트
+
+            }}>
+              
+              <Text style={{marginLeft:5,fontSize:10,color:'black'}}>{e.privateKey}T </Text>
+              <Text style={{marginLeft:5,fontSize:7}}>{e.name}</Text>
+              {e.ordering?<Text style={{marginLeft:5, color:'red', fontSize:7}}>식사 중</Text>:<Text style={{marginLeft:10, color:'green'}}></Text>}
+              
+              </TouchableOpacity>
+
+            </View>
+            </>
+          )
+        })}
+      </View>
       )}
 
       <View>
@@ -216,6 +262,8 @@ const ReservationDetail = () => {
     }}>
       <Text style={{alignSelf: 'center', color: 'white', fontSize: 25}} onPress={()=>{
         const parsedDate = new Date(formattedDate);
+        const timeZoneOffsetInMinutes = parsedDate.getTimezoneOffset();
+        parsedDate.setMinutes(parsedDate.getMinutes() - timeZoneOffsetInMinutes); // 시간대를 고려한 시간 조정
         const newDate = parsedDate.toISOString().replace('T', ' ').split('.')[0];
         const info = 
           {
@@ -224,6 +272,9 @@ const ReservationDetail = () => {
             reservationTime:newDate,
             orderCode:'RESERVATION_WAIT'
           }
+          console.log('parsedDate' + parsedDate);
+          console.log('newDate' + newDate  );
+          console.log('formattedDate' + formattedDate);
         const selectedMenu = menus.filter(item => item.count !==0);
 
 
@@ -242,6 +293,8 @@ const ReservationDetail = () => {
                 console.log(data);
               })
               alert('예약 신청 완료');
+              navigation.navigate('stackStoreReservation')
+              
             })
             
           })
@@ -275,6 +328,16 @@ const styles = StyleSheet.create({
       alignSelf: 'center',
       justifyContent:'center'
   },
+  informationTable: {
+    borderBottomWidth:0.4,
+    borderColor:'grey',
+    backgroundColor: 'white',
+    width: '85%',
+    height: 220,
+    margin: 20,
+    marginLeft: 30,
+    borderRadius:20,
+  }
   });
 
 export default ReservationDetail;
